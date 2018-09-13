@@ -1,0 +1,287 @@
+import {
+  LinkConfiguration,
+  Row,
+  Status,
+  Response,
+  QueryOperation
+} from '@types';
+import { CODE } from '@code';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { StoreService } from '@StoreService';
+import {
+  ColumnMetaData,
+  ColumnType,
+  DropDownColumn,
+  Store,
+  DMLResponse
+} from '@types';
+import { MessageService } from '@message';
+
+import { ModalDirective } from 'ngx-bootstrap/modal';
+
+import { UsersTable } from './../tables/UsersTable';
+import { RolesTable } from '../tables/RolesTable';
+import { UserRolesTable } from '../tables/UserRolesTable';
+import { UserFunctionsTable } from '../tables/UserFunctionsTable';
+
+@Component({
+  selector: 'app-manage-users',
+  templateUrl: './manage-users.component.html',
+  styleUrls: ['./manage-users.component.scss']
+})
+export class ManageUsersComponent implements OnInit, OnDestroy {
+  constructor(private storeService: StoreService) {}
+  @ViewChild('rolesModal')
+  rolesModal: ModalDirective;
+  @ViewChild('functionsModal')
+  functionsModal: ModalDirective;
+  @ViewChild('popupModal')
+  popupModal: ModalDirective;
+
+  usersStore: Store;
+  userRolesStore: Store;
+  userFunctionsStore: Store;
+  rolesDropDownStore: Store;
+  functionsDropDownStore: Store;
+  currentRow: Row;
+
+  currentUser: string;
+  currentEmail: string;
+  currentPassword: string;
+
+  openRoles = (row: Row, columnMd: ColumnMetaData<RolesTable>) => {
+    this.rolesModal.show();
+    this.currentRow = row;
+    this.userRolesStore.whereClauseParams = [row.userId];
+    this.userRolesStore.query();
+  }
+
+  openFunctions = (row: Row, columnMd: ColumnMetaData<RolesTable>) => {
+    this.currentRow = row;
+    this.userFunctionsStore.whereClauseParams = [row.userId];
+    this.userFunctionsStore.query();
+    this.functionsModal.show();
+  }
+
+  ngOnInit() {
+    this.usersStore = this.storeService.getInstance(
+      'Users',
+      'users',
+      this.getUsersColumnsMd(),
+      {
+        autoQuery: true,
+        inserAllowed: true,
+        updateAllowed: true,
+        deleteAllowed: true
+      }
+    );
+    this.usersStore.afterSave = (res: DMLResponse) => {
+      if (res && res.rows && res.rows.length > 0) {
+        const userAdded = false;
+        res.rows.forEach(row => {
+          if (
+            row.$status$ === Status.SUCCESS &&
+            row.$operation$ === QueryOperation.INSERT
+          ) {
+            this.currentUser = row.userName;
+            this.currentEmail = row.emailAddress;
+            this.currentPassword = row.password;
+            this.popupModal.show();
+          }
+        });
+      }
+    };
+    this.rolesDropDownStore = this.storeService.getInstance(
+      'Roles',
+      'roles',
+      [],
+      {
+        autoQuery: true
+      }
+    );
+    this.functionsDropDownStore = this.storeService.getInstance(
+      'Functions',
+      'functions',
+      [],
+      {
+        autoQuery: true
+      }
+    );
+    this.userRolesStore = this.storeService.getInstance(
+      'UserRoles',
+      'userroles',
+      this.getUserRolesColumnsMd(),
+      {
+        inserAllowed: true,
+        updateAllowed: true,
+        deleteAllowed: true,
+        whereClause: 'user_id = ?'
+      }
+    );
+    this.userFunctionsStore = this.storeService.getInstance(
+      'UserFunctions',
+      'userfunctions',
+      this.getUserFunctionsColumnsMd(),
+      {
+        inserAllowed: true,
+        updateAllowed: true,
+        deleteAllowed: true,
+        whereClause: 'user_id = ?'
+      }
+    );
+    this.userRolesStore.beforeSave = (dirtyRows: Row[]) => {
+      const user = this.currentRow;
+      const response: Response = {
+        status: Status.SUCCESS,
+        responseCode: CODE.ERR_BERORE_DML,
+        message: ''
+      };
+      for (let i = 0; i < dirtyRows.length; i++) {
+        const dirtyRow = dirtyRows[i];
+        if (dirtyRow.$operation$ !== QueryOperation.DELETE) {
+          if (user && user.userId && dirtyRow.roleId) {
+            dirtyRows[i].userId = user.userId;
+          } else {
+            response.status = Status.ERROR;
+            response.message = 'Please save/select user first';
+            break;
+          }
+        }
+      }
+      return response;
+    };
+
+    this.userFunctionsStore.beforeSave = (dirtyRows: Row[]) => {
+      const user = this.currentRow;
+      const response: Response = {
+        status: Status.SUCCESS,
+        responseCode: CODE.ERR_BERORE_DML,
+        message: ''
+      };
+      for (let i = 0; i < dirtyRows.length; i++) {
+        const dirtyRow = dirtyRows[i];
+        if (dirtyRow.$operation$ !== QueryOperation.DELETE) {
+          if (user && user.userId && dirtyRow.functionId) {
+            dirtyRows[i].userId = user.userId;
+          } else {
+            response.status = Status.ERROR;
+            response.message = 'Please save/select user first';
+            break;
+          }
+        }
+      }
+      return response;
+    };
+  }
+  ngOnDestroy() {
+    this.usersStore.destroy();
+    this.userRolesStore.destroy();
+    this.rolesDropDownStore.destroy();
+    this.functionsDropDownStore.destroy();
+  }
+
+  getUserRolesColumnsMd = (): ColumnMetaData<UserRolesTable>[] => {
+    return [
+      {
+        column: UserRolesTable.roleId,
+        title: 'Role',
+        type: ColumnType.DROP_DOWN,
+        required: true,
+        inserAllowed: true,
+        updateAllowed: false,
+        dropDownConfiguration: {
+          store: this.rolesDropDownStore,
+          displayColumn: 'roleName',
+          valueColumn: 'roleId'
+        }
+      }
+    ];
+  }
+
+  getUserFunctionsColumnsMd = (): ColumnMetaData<UserFunctionsTable>[] => {
+    return [
+      {
+        column: UserFunctionsTable.functionId,
+        title: 'Function',
+        type: ColumnType.DROP_DOWN,
+        required: true,
+        inserAllowed: true,
+        updateAllowed: false,
+        dropDownConfiguration: {
+          store: this.functionsDropDownStore,
+          displayColumn: 'functionName',
+          valueColumn: 'functionId'
+        }
+      }
+    ];
+  }
+
+  getUsersColumnsMd = (): ColumnMetaData<UsersTable>[] => {
+    return [
+      {
+        column: UsersTable.userId,
+        title: 'User Id',
+        type: ColumnType.STRING,
+        required: false,
+        inserAllowed: false,
+        updateAllowed: false
+      },
+      {
+        column: UsersTable.userName,
+        title: 'User Name',
+        type: ColumnType.STRING,
+        required: true,
+        inserAllowed: true,
+        updateAllowed: false
+      },
+      {
+        column: UsersTable.displayName,
+        title: 'Display Name',
+        type: ColumnType.STRING,
+        required: true,
+        inserAllowed: true,
+        updateAllowed: true
+      },
+      {
+        column: UsersTable.emailAddress,
+        title: 'Email Address',
+        type: ColumnType.STRING,
+        required: true,
+        inserAllowed: true,
+        updateAllowed: true
+      },
+      {
+        column: UsersTable.createDate,
+        title: 'Created On',
+        type: ColumnType.DATE,
+        inserAllowed: true,
+        updateAllowed: true,
+        required: false
+      },
+      {
+        column: '',
+        title: 'Roles',
+        type: ColumnType.LINK,
+        linkConfiguration: {
+          icon: 'icon-organization',
+          onClick: this.openRoles
+        },
+        inserAllowed: true,
+        updateAllowed: false,
+        required: false
+      }
+      // {
+      //   column: '',
+      //   title: 'Functions',
+      //   type: ColumnType.LINK,
+      //   linkConfiguration: {
+      //     icon: 'icon-badge',
+      //     onClick: this.openFunctions
+      //   },
+      //   inserAllowed: true,
+      //   updateAllowed: false,
+      //   required: false
+      // }
+    ];
+  }
+}

@@ -1,0 +1,15 @@
+var shell = require('shelljs');
+shell.exec('rm -rf ./../iapp');
+shell.exec('rm -rf ./../iapp.zip');
+shell.exec('npm run build-server-only');
+shell.exec('cp ./bin/_run.js ./../iapp/server');
+shell.exec('cp ./bin/prod ./../iapp/server');
+shell.exec('cp ./bin/start.sh ./../iapp/server');
+shell.exec('cp ./src/templates/tsconfig.json ./../iapp');
+// shell.exec('cp ./src/templates/package.json ./../iapp/server');
+shell.exec('cp ./src/templates/.properties ./../iapp');
+shell.exec('cd ./../iapp && rm -rf scripts && mkdir scripts');
+shell.exec('npm run merge-scripts');
+shell.exec('cd ./../iapp &&  mkdir logs');
+shell.exec('cp -r ./node_modules ./../iapp/server');
+shell.exec('cd ./../client && npm run build-client-prod');

@@ -1,0 +1,144 @@
+<html>
+
+<head>
+    <meta charset="utf8">
+    <title>SuitArt Business Card</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0 20;
+        }
+
+        .page {
+            overflow: hidden;
+        }
+
+        .logo {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        .header-1 {
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase
+        }
+
+        p {
+            margin: 0px;
+        }
+
+        .content {
+            padding: 0px 40px;
+        }
+
+        .content p {
+            font-size: 16px
+        }
+
+        .content .heading1 {
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: underline
+        }
+
+        .m-t-b-20 {
+            margin: 20px 0px 10px 0px;
+        }
+
+        .underline {
+            text-decoration: underline;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .footer-word {
+            text-decoration: underline;
+            color: rgb(180, 2, 46);
+        }
+    </style>
+</head>
+
+<body>
+    <div
+        class="page"
+        style="width: 100%"
+    >
+        <img
+            style="display: none"
+            src="{logo}"
+        >
+        <div style="text-align:center;">
+            <p class="header-1">
+                PROPOSAL FOR DETAILING</p>
+            <p class="header-1">${sales.projectName}</p>
+        </div>
+        <div class="content">
+            <div style="text-align:right;margin-top: 10px;">
+                <p>Date: ${today}</p>
+                <!-- <p style="font-size: 14px; font-weight: bold">JOB NO: 3S/NA/18-19/28</p> -->
+            </div>
+            <div>
+                <p>To</p>
+                <p>${client.contactName}</p>
+                <p>${client.addressLine1}</p>
+                <#if client.addressLine2??>
+                    <p>${client.addressLine2}</p>
+                </#if>
+                <p>${client.city}, ${client.state}</p>
+                <p>${client.country}
+                    <#if client.zip??>,${client.zip}</#if>
+                </p>
+            </div>
+            <p class="heading1 m-t-b-20">
+                PURPOSE
+            </p>
+            <div>
+                <p>
+                    This is a proposal from <b>3S Services Group LLC.</b> For Detailing & Fabrication Drawing Services to
+                    <b>${client.clientName}.</b>
+                    Regarding <b>${sales.projectName}</b>
+                </p>
+            </div>
+            <p class="heading1 m-t-b-20">SCOPE OF WORK</p>
+            <p class="underline"><b>Main Steel</b></p>
+            <ol style="margin-top:5px">
+                <#list
+                    estimation.mainSteelInclusions
+                    as
+                    i
+                >
+                    <li>${i}</li>
+                </#list>
+            </ol>
+            <p class="underline m-t-b-20"><b>Misc. Steel</b></p>
+            <ol style="margin-top:5px">
+                <#list
+                    estimation.miscSteelInclusions
+                    as
+                    i
+                >
+                    <li>${i}</li>
+                </#list>
+            </ol>
+        </div>
+    </div>
+    <div id="pageFooter">
+        <div style="width:100%;border: 1px solid rgba(180,2,46, 0.5)"></div>
+        <div style="text-align: right">
+            Page <span class="bold">{{page}}</span> of <span class="bold">{{pages}}</span>
+        </div>
+        <div style="text-align: center">
+            <p style="font-size:24; font-weight: 300">
+                <span class="footer-word">S</span>tructural <span class="footer-word">S</span>teel is our <span class="footer-word">S</span>pirit
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

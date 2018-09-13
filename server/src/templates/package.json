@@ -1,0 +1,14 @@
+{
+  "name": "iapp",
+  "version": "1.0.0",
+  "description": "It contains server code for Sales and Projects module",
+  "main": "index.js",
+  "scripts": {
+    "start-prod": "node prod"
+  },
+  "keywords": [
+    "iapp"
+  ],
+  "author": "Vasam",
+  "license": "ISC"
+}
