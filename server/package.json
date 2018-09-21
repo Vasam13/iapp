@@ -57,7 +57,6 @@
     "node-image-resizer": "^1.0.0",
     "nodemailer": "^4.6.8",
     "password-generator": "^2.2.0",
-    "pdfkit": "^0.8.3",
     "properties-reader": "0.0.16",
     "request": "^2.88.0",
     "resize-image": "^0.1.0",
