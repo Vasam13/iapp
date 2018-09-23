@@ -80,7 +80,9 @@
           </div>
           <div class="row">
             <div class="col-lg-12 col-md-12 col-xs-12">
-              <app-grid [store]="userRolesStore"></app-grid>
+              <div *ngIf="showRoles">
+                <app-grid [store]="userRolesStore"></app-grid>
+              </div>
             </div>
           </div>
 
@@ -134,7 +136,7 @@
               </div>
             </div>
           </div>
-          <app-grid [store]="userFunctionsStore"></app-grid>
+          <!-- <app-grid [store]="userFunctionsStore"></app-grid> -->
         </div>
       </div>
     </div>
@@ -162,7 +164,8 @@
           ><i class="pg pg-close fs-14"></i>
           </button>
           <h5><span class="semi-bold">Success</span></h5>
-          <p class="p-b-10">User <span class="bold">{{currentUser}}</span> is created and password is sent to <span class="bold">{{currentEmail}}</span></p>
+          <p class="p-b-10">User <span class="bold">{{currentUser}}</span> is created and password is sent to <span
+              class="bold">{{currentEmail}}</span></p>
           <!-- <span *ngIf="currentPassword"><h5>Password: <span class="semi-bold">{{currentPassword}}</span></h5></span> -->
         </div>
         <div class="modal-body">

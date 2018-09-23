@@ -3,7 +3,7 @@ import { APIManager } from '@types';
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import Utils from '@utils';
+import {Utils} from '@utils';
 import { APIService } from '@APIService';
 
 @Component({

@@ -1,4 +1,4 @@
-import Utils from '@utils';
+import {Utils} from '@utils';
 import { Store, Status, LeadStatus, Roles } from '@types';
 import { ColumnMetaData, ColumnType } from '@types';
 import { Component, OnInit, OnDestroy } from '@angular/core';

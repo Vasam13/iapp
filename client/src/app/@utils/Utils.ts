@@ -1,4 +1,4 @@
-import { URLType } from './../@types/types';
+import { URLType, Map, State } from './../@types/types';
 import { MessageService } from '@message';
 import {
   Row,
@@ -13,13 +13,14 @@ import {
   RoleCategory
 } from '@types';
 import * as constants from '@constants';
-import { Router } from '@angular/router';
+import { Router, RouterState, ActivatedRoute, Routes } from '@angular/router';
 import RootScope from '@RootScope';
 import CoockieUtils from './CoockieUtils';
 import { Injectable } from '@angular/core';
+import { DynamicRoutes } from '../@types/dynamic-routes';
 
 @Injectable()
-export default class Utils {
+export class Utils {
   static notify(
     service: MessageService,
     type: NotifType,
@@ -347,5 +348,55 @@ export default class Utils {
 
   static getCurrYear() {
     return new Date().getFullYear();
+  }
+
+  static getMyStates(states: State[]) {
+    const roles = this.getRoles();
+    const filteredStates = [];
+    for (let i = 0; i < roles.length; i++) {
+      const role: Map = roles[i];
+      for (let j = 0; j < states.length; j++) {
+        const state = states[j];
+        if (state.roleCodes && state.roleCodes.length > 0) {
+          if (
+            state.roleCodes.indexOf(role.roleCode) > -1 ||
+            state.roleCodes.indexOf(Roles.ALL_USERS)
+          ) {
+            filteredStates.push(state);
+          }
+        }
+      }
+    }
+    return filteredStates;
+  }
+
+  static getStateData(router: Router) {
+    const state: RouterState = router.routerState;
+    const c = state.root.children;
+    if (c.length > 0 && c[0].routeConfig.children.length > 0) {
+      return c[0].routeConfig.children[0].data.state;
+    }
+  }
+
+  static filterAuthorizedURL(router: Router, states: State[]): string {
+    const url = router.url;
+    const restrictURL = '/restricted';
+    const myStates = this.getMyStates(states);
+    const routerState = this.getStateData(router);
+    if (myStates.length === 0 || !routerState) {
+      return restrictURL;
+    }
+    if (!url || url.trim().length === 0 || url === '/') {
+      const homeUrl = myStates.filter(entry => entry.isHome === 'Y');
+      return homeUrl.length > 0 ? homeUrl[0].url : myStates[0].url;
+    }
+    let authUrl;
+    for (let i = 0; i < myStates.length; i++) {
+      const myState = myStates[i];
+      if (myState.state === routerState) {
+        authUrl = myState.url;
+      }
+    }
+    return authUrl ? authUrl : restrictURL;
   }
 }

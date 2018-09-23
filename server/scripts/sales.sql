@@ -1,17 +1,8 @@
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
---
--- Database: `iapp`
---
 DROP DATABASE IF EXISTS `iapp`;
-CREATE DATABASE `iapp` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE `iapp`;
 USE `iapp`;
 
--- --------------------------------------------------------
 
---
--- Table structure for table `clients`
---
 DROP TABLE  IF EXISTS clients;
 CREATE TABLE clients (
     client_id INT(11) primary key auto_increment,
@@ -35,12 +26,9 @@ CREATE TABLE clients (
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 ALTER TABLE clients AUTO_INCREMENT=5000;
 
---
--- Table structure for table `sales`
---
 DROP TABLE  IF EXISTS sales;
 CREATE TABLE sales (
   sales_id INT(11) primary key auto_increment,
@@ -80,11 +68,8 @@ CREATE TABLE sales (
   create_user_id int(11) NOT NULL,
   update_date datetime NOT NULL,
   update_user_id int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 ALTER TABLE sales AUTO_INCREMENT=10000;
---
--- Table structure for table `estimations`
---
 
 DROP TABLE IF EXISTS estimations;
 CREATE TABLE estimations (
@@ -105,11 +90,7 @@ CREATE TABLE estimations (
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Table structure for table `quotes`
---
+);
 
 DROP TABLE IF EXISTS quotes;
 CREATE TABLE quotes (
@@ -127,11 +108,8 @@ CREATE TABLE quotes (
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
---
--- Table structure for table `users`
---
 DROP TABLE IF EXISTS users;
 CREATE TABLE users(
 	user_id INT(11) primary key auto_increment,
@@ -148,7 +126,7 @@ CREATE TABLE users(
     update_user_id int(11) NOT NULL,
     last_login_date datetime NULL,
     last_login_ip VARCHAR(200) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 ALTER TABLE users AUTO_INCREMENT=1001;
 insert into users(user_id, user_name, display_name, password_hash, password_changed, email_address, create_date, create_user_id,
 update_date, update_user_id) values(1000, 'admin', 'admin', '$2b$10$ABipm0utDcdrqnRAtDzrIehw0bcN2KhqZxNC7Kvsx/IIpIjNZmReC', 'N', 'test@email.com',  SYSDATE(), 1,  SYSDATE(), 1 );
@@ -165,7 +143,7 @@ CREATE TABLE roles(
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL,
     UNIQUE KEY `role_unique_key` (`role_name`,`role_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 insert into roles(role_id, role_name, role_code, role_category, create_date, create_user_id,update_date, update_user_id) values
 (0, 'Administrator', 'administrator', 'Default', SYSDATE(), 1,  SYSDATE(), 1 );
 insert into roles(role_name, role_code, role_category, create_date, create_user_id,update_date, update_user_id) values
@@ -189,7 +167,7 @@ CREATE TABLE user_roles(
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 insert into user_roles(role_id, user_id, create_date, create_user_id,update_date, update_user_id) 
 values(0, 1000, SYSDATE(), 1,  SYSDATE(), 1 );
 
@@ -201,7 +179,7 @@ CREATE TABLE role_category(
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 insert into role_category(category_name, create_date, create_user_id,update_date, update_user_id) 
 values('Sales', SYSDATE(), 1,  SYSDATE(), 1 );
 insert into ROLE_CATEGORY(category_name, create_date, create_user_id,update_date, update_user_id) 
@@ -221,7 +199,7 @@ CREATE TABLE functions(
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL,
     UNIQUE KEY `funtion_unique_key` (`function_name`,`function_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 DROP TABLE IF EXISTS user_functions;
 CREATE TABLE user_functions(
@@ -232,7 +210,7 @@ CREATE TABLE user_functions(
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 DROP TABLE IF EXISTS EMAIL_ACTIONS;
 CREATE TABLE EMAIL_ACTIONS(
@@ -261,7 +239,7 @@ CREATE TABLE `exclusions_inclusions` (
    `create_user_id` int(11) NOT NULL,
    `update_date` datetime NOT NULL,
    `update_user_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 INSERT INTO `exclusions_inclusions` (`desc`, `type`, `create_user_id`, `create_date`, `update_date`, `update_user_id`) VALUES
 ('Connection Design & PE Stamping', 'main_exclusions', 1, SYSDATE(), SYSDATE(), 1),

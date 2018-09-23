@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { StoreService } from '@StoreService';
 import { MessageService } from '@message';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import Utils from '@utils';
+import {Utils} from '@utils';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { ProjectContractDrawingsTable } from '../tables/ProjectContractDrawingsTable';
 import ProjectContractDrawingsType from '../tables/types/ProjectContractDrawingsType';

@@ -48,12 +48,19 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   currentUser: string;
   currentEmail: string;
   currentPassword: string;
+  showRoles = true;
 
   openRoles = (row: Row, columnMd: ColumnMetaData<RolesTable>) => {
     this.rolesModal.show();
     this.currentRow = row;
     this.userRolesStore.whereClauseParams = [row.userId];
     this.userRolesStore.query();
+    this.rolesModal.onShow.subscribe(value => {
+      this.showRoles = true;
+    });
+    this.rolesModal.onHidden.subscribe(value => {
+      this.showRoles = false;
+    });
   }
 
   openFunctions = (row: Row, columnMd: ColumnMetaData<RolesTable>) => {
@@ -253,10 +260,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       {
         column: UsersTable.createDate,
         title: 'Created On',
-        type: ColumnType.DATE,
-        inserAllowed: true,
-        updateAllowed: true,
-        required: false
+        type: ColumnType.DATE
       },
       {
         column: '',

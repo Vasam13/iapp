@@ -88,6 +88,7 @@ pg-datepicker .form-control[readonly] {
 
 .datatable-body-cell select {
   width: 90% !important;
+  background: #fff;
 }
 
 select[disabled] {
@@ -124,4 +125,9 @@ input[type='month'] {
 
 .thick-blue-left {
   border-left: 3px solid #007bff !important;
+}
+
+select[disabled] {
+  cursor: text;
+  background: #fff;
 }

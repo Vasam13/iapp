@@ -6,7 +6,7 @@ import {
 } from './../../@pages/components/upload/interface';
 import { pgUploadBtnComponent } from './../../@pages/components/upload/upload-btn.component';
 import { DataUtils } from './../../@application/data';
-import Utils from '@utils';
+import {Utils} from '@utils';
 import {
   Component,
   OnInit,

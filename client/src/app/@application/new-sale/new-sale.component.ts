@@ -6,7 +6,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { StoreService } from '@StoreService';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import Utils from '@utils';
+import {Utils} from '@utils';
 import ClientsType from './../tables/types/ClientsType';
 import SalesType from './../tables/types/SalesType';
 import { DataUtils } from '../data';

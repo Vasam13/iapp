@@ -8,7 +8,7 @@ import { Map, Status } from '@types';
 import { Injectable } from '@angular/core';
 import { MessageService } from '@message';
 import { v4 as uuid } from 'uuid';
-import Utils from '@utils';
+import { Utils } from '@utils';
 
 @Injectable()
 export class StoreService {
@@ -325,7 +325,7 @@ class StoreImpl implements Store {
       mnth = ('0' + (date.getMonth() + 1)).slice(-2),
       day = ('0' + date.getDate()).slice(-2);
     return [date.getFullYear(), mnth, day].join('-');
-  }
+  };
 
   public query(): Promise<QueryResponse> {
     return new Promise((resolve, reject) => {

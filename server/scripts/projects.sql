@@ -52,7 +52,7 @@ CREATE TABLE `project_rfi_details` (
     `create_user_id` int(11) NOT NULL,
     `update_date` datetime NOT NULL,
     `update_user_id` int(11) NOT NULL
-)
+);
 
 DROP TABLE IF EXISTS `project_cnn_details`;
 CREATE TABLE `project_cnn_details` (
@@ -68,7 +68,7 @@ CREATE TABLE `project_cnn_details` (
     `create_user_id` int(11) NOT NULL,
     `update_date` datetime NOT NULL,
     `update_user_id` int(11) NOT NULL
-)
+);
 
 DROP TABLE IF EXISTS `project_bfa_details`;
 CREATE TABLE `project_bfa_details` (
@@ -86,7 +86,7 @@ CREATE TABLE `project_bfa_details` (
     `create_user_id` int(11) NOT NULL,
     `update_date` datetime NOT NULL,
     `update_user_id` int(11) NOT NULL
-)
+);
 
 DROP TABLE IF EXISTS `project_task_details`;
 CREATE TABLE `project_task_details` (
@@ -104,4 +104,4 @@ CREATE TABLE `project_task_details` (
     `create_user_id` int(11) NOT NULL,
     `update_date` datetime NOT NULL,
     `update_user_id` int(11) NOT NULL
-)
+);

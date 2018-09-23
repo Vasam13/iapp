@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { StoreService } from '@StoreService';
 import { MessageService } from '@message';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import Utils from '@utils';
+import {Utils} from '@utils';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { ProjectBfaDetailsTable } from '../tables/ProjectBfaDetailsTable';
 import ProjectBfaDetailsType from '../tables/types/ProjectBfaDetailsType';

@@ -1,7 +1,7 @@
 import { APIManager } from './../@types/types';
 import { Subscription } from 'rxjs/Subscription';
 import { QueryResponse, DMLResponse, DMLRequest, Row, UserInfo } from '@types';
-import Utils from '@utils';
+import {Utils} from '@utils';
 import { Injectable } from '@angular/core';
 import { Map, NotifType, Response, Status, NotifPosition } from '@types';
 import { HttpClient } from '@angular/common/http';

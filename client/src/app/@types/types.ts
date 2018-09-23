@@ -230,6 +230,21 @@ export enum RoleCategory {
   PROJECTS = 'Projects'
 }
 
+export interface State {
+  isHome: string;
+  state: string;
+  menuLabel?: string;
+  menuIcon?: string;
+  roleCodes?: string[];
+}
+
+export interface AppRoute {
+  path: string;
+  component: any;
+  data?: State;
+  children?: AppRoute[];
+}
+
 export enum Roles {
   ADMINISTRATOR = 'administrator',
   MANAGEMENT = 'management',
@@ -240,7 +255,8 @@ export enum Roles {
   TEAM_LEAD = 'teamlead',
   PROJECT_MANAGER = 'projectmanager',
   DEVELOPER = 'developer',
-  CHECKER = 'checker'
+  CHECKER = 'checker',
+  ALL_USERS = 'allusers'
 }
 
 export enum Functions {

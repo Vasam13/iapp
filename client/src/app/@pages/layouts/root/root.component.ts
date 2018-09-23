@@ -24,7 +24,7 @@ import {
 } from '@angular/router';
 declare var pg: any;
 import { CookieService } from 'ngx-cookie-service';
-import Utils from '@utils';
+import {Utils} from '@utils';
 
 @Component({
   selector: 'root-layout',

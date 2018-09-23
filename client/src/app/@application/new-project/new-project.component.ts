@@ -1,6 +1,6 @@
 import { Row, QueryOperation, ProjectStatus } from '@types';
 import { MessageService } from '@message';
-import Utils from '@utils';
+import {Utils} from '@utils';
 import { Store, Status } from '@types';
 import { StoreService } from '@StoreService';
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';

@@ -1,8 +1,9 @@
-import { Roles, RoleCategory, URLType } from '@types';
+import { Roles, RoleCategory, URLType, State } from '@types';
 import RootScope from '@RootScope';
-import Utils from '@utils';
+import { Utils } from '@utils';
 import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { RootLayout } from '../root/root.component';
+import { DynamicRoutes } from '../../../@types/dynamic-routes';
 
 @Component({
   selector: 'condensed-layout',
@@ -106,31 +107,11 @@ export class CondensedComponent extends RootLayout implements OnInit {
     const hasSales = Utils.hasRoleCategory(RoleCategory.SALES);
     const hasProjects = Utils.hasRoleCategory(RoleCategory.PROJECTS);
     const isAdmin = Utils.hasRole(Roles.ADMINISTRATOR);
-    if (!(hasSales || hasProjects || isAdmin)) {
-      this.router.navigate(['/restricted']);
-      return;
-    } else if (
-      isAdmin &&
-      !Utils.urlIsOf(this.router, [URLType.ADMINISTRATOR])
-    ) {
-      this.router.navigate(['/settings/manage-users']);
-      return;
-    } else if (
-      hasSales &&
-      !hasProjects &&
-      !Utils.urlIsOf(this.router, [URLType.SALES, URLType.CLIENTS])
-    ) {
-      this.router.navigate(['/sales']);
-      return;
-    } else if (
-      hasProjects &&
-      !hasSales &&
-      !Utils.urlIsOf(this.router, [URLType.PROJECTS])
-    ) {
-      this.router.navigate(['/projects']);
+    const authUrl = Utils.filterAuthorizedURL(this.router, this.getStates());
+    if (authUrl !== this.router.url) {
+      this.router.navigate([authUrl]);
       return;
     }
-
     if (
       Utils.hasAnyRole([Roles.SALES_MANAGER, Roles.SALES_PERSON]) &&
       hasSales
@@ -166,11 +147,26 @@ export class CondensedComponent extends RootLayout implements OnInit {
     }
   }
 
+  getStates(): State[] {
+    const states: State[] = [];
+    const appRotes = DynamicRoutes.routes;
+    for (let i = 0; i < appRotes.length; i++) {
+      const route = appRotes[i];
+      if (route.data) {
+        states.push(<State>route.data);
+      }
+    }
+    return states;
+  }
+
   _logOut() {
     this.logOut();
   }
 
   gotoPreferences() {
     this.router.navigate(['/settings/preferences']);
+  }
+  goHome() {
+    this.router.navigate(['/']);
   }
 }
