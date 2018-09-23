@@ -325,7 +325,11 @@ class StoreImpl implements Store {
       mnth = ('0' + (date.getMonth() + 1)).slice(-2),
       day = ('0' + date.getDate()).slice(-2);
     return [date.getFullYear(), mnth, day].join('-');
-  };
+  }
+
+  public busy() {
+    return this.isBusy;
+  }
 
   public query(): Promise<QueryResponse> {
     return new Promise((resolve, reject) => {

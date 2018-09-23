@@ -102,6 +102,11 @@ select[disabled] {
   color: #000;
 }
 
+.select-readyonly {
+  color: #000;
+  font-size: 14px;
+}
+
 .badge badge-completed {
   background: #007bff;
   color: #fff;

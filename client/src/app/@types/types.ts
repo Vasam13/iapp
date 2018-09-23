@@ -17,6 +17,7 @@ export interface Store {
   orderByClause: string;
   // currentRow: Row;
   columnsMD: ColumnMetaData<Map>[];
+  busy();
   getDirtyRows(): Row[];
   onRowSelect(val: any): void;
   deleteSelected();
@@ -230,13 +231,23 @@ export enum RoleCategory {
   PROJECTS = 'Projects'
 }
 
-export interface State {
-  isHome: string;
-  state: string;
-  menuLabel?: string;
-  menuIcon?: string;
-  roleCodes?: string[];
+export interface StateMenu {
+  routerLink: string;
+  label: string;
+  iconName: string;
+  iconType: string;
+  details?: string;
+  thumbNailClass?: string;
 }
+export interface State {
+  state: string;
+  url: string;
+  roleCodes: Roles[];
+  isHome?: string;
+  menu?: StateMenu;
+}
+
+export declare type States = State[];
 
 export interface AppRoute {
   path: string;

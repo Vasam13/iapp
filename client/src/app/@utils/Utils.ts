@@ -17,7 +17,7 @@ import { Router, RouterState, ActivatedRoute, Routes } from '@angular/router';
 import RootScope from '@RootScope';
 import CoockieUtils from './CoockieUtils';
 import { Injectable } from '@angular/core';
-import { DynamicRoutes } from '../@types/dynamic-routes';
+import { AppStates } from '../app.states';
 
 @Injectable()
 export class Utils {
@@ -350,46 +350,63 @@ export class Utils {
     return new Date().getFullYear();
   }
 
-  static getMyStates(states: State[]) {
-    const roles = this.getRoles();
+  static getMyStates() {
     const filteredStates = [];
-    for (let i = 0; i < roles.length; i++) {
-      const role: Map = roles[i];
-      for (let j = 0; j < states.length; j++) {
-        const state = states[j];
-        if (state.roleCodes && state.roleCodes.length > 0) {
+    AppStates.forEach(state => {
+      if (state.roleCodes && state.roleCodes.length > 0) {
+        this.getRoles().forEach(role => {
           if (
             state.roleCodes.indexOf(role.roleCode) > -1 ||
-            state.roleCodes.indexOf(Roles.ALL_USERS)
+            state.roleCodes.indexOf(Roles.ALL_USERS) > -1
           ) {
             filteredStates.push(state);
           }
-        }
+        });
       }
-    }
+    });
     return filteredStates;
   }
 
   static getStateData(router: Router) {
     const state: RouterState = router.routerState;
     const c = state.root.children;
-    if (c.length > 0 && c[0].routeConfig.children.length > 0) {
+    if (
+      c &&
+      c.length > 0 &&
+      c[0].routeConfig.children &&
+      c[0].routeConfig.children.length > 0 &&
+      c[0].routeConfig.children[0].data
+    ) {
       return c[0].routeConfig.children[0].data.state;
     }
   }
 
-  static filterAuthorizedURL(router: Router, states: State[]): string {
-    const url = router.url;
-    const restrictURL = '/restricted';
-    const myStates = this.getMyStates(states);
+  static getMenuStates(router: Router) {
     const routerState = this.getStateData(router);
-    if (myStates.length === 0 || !routerState) {
+    return this.getMyStates().filter((appState: State) => {
+      if (appState.menu) {
+        if (appState.state === routerState) {
+          appState.menu.thumbNailClass = 'bg-primary';
+        } else {
+          appState.menu.thumbNailClass = null;
+        }
+        return true;
+      }
+    });
+  }
+
+  static getAuthorizedURL(router: Router): string {
+    const restrictURL = '/restricted';
+    const myStates = this.getMyStates();
+    if (myStates.length === 0) {
       return restrictURL;
     }
+    const url = router.url;
     if (!url || url.trim().length === 0 || url === '/') {
       const homeUrl = myStates.filter(entry => entry.isHome === 'Y');
       return homeUrl.length > 0 ? homeUrl[0].url : myStates[0].url;
     }
+    const routerState = this.getStateData(router);
     let authUrl;
     for (let i = 0; i < myStates.length; i++) {
       const myState = myStates[i];

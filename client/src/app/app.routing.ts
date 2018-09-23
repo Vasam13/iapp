@@ -29,7 +29,8 @@ export const AppRoutes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'sales'
+    data: { state: '/' },
+    component: CondensedComponent,
   },
   {
     path: '',
@@ -48,6 +49,182 @@ export const AppRoutes: Routes = [
       {
         path: 'restricted',
         component: UnAuthorizedComponent
+      }
+    ]
+  },
+  {
+    path: 'settings',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'preferences',
+        component: PreferencesComponent,
+        data: { state: 'settings.preferences' }
+      }
+    ]
+  },
+  {
+    path: 'settings',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'manage-users',
+        component: ManageUsersComponent,
+        data: { state: 'settings.manage-users' }
+      }
+    ]
+  },
+  {
+    path: 'settings',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'manage-roles',
+        component: ManageRolesComponent,
+        data: { state: 'settings.manage-roles' }
+      }
+    ]
+  },
+  {
+    path: 'settings',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'email-actions',
+        component: EmailActionsComponent,
+        data: { state: 'settings.email-actions' }
+      }
+    ]
+  },
+  {
+    path: 'sales',
+    component: CondensedComponent,
+    children: [
+      {
+        path: '',
+        component: SalesComponent,
+        data: { state: 'sales' }
+      }
+    ]
+  },
+  {
+    path: 'sales',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'new',
+        component: NewSaleComponent,
+        data: { state: 'sales.new' }
+      }
+    ]
+  },
+  {
+    path: 'sales',
+    component: CondensedComponent,
+    children: [
+      {
+        path: ':id',
+        component: SaleDetailsComponent,
+        data: { state: 'sales.id' }
+      }
+    ]
+  },
+  {
+    path: 'clients',
+    component: CondensedComponent,
+    children: [
+      {
+        path: '',
+        component: ClientsComponent,
+        data: { state: 'clients' }
+      }
+    ]
+  },
+  {
+    path: 'clients',
+    component: CondensedComponent,
+    children: [
+      {
+        path: ':id',
+        component: NewClientComponent,
+        data: { state: 'clients.:id' }
+      }
+    ]
+  },
+  {
+    path: 'projects',
+    component: CondensedComponent,
+    children: [
+      {
+        path: '',
+        component: ProjectsComponent,
+        data: { state: 'projects' }
+      }
+    ]
+  },
+  {
+    path: 'projects',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'details/:id',
+        component: NewProjectComponent,
+        data: { state: 'projects/details/id' }
+      }
+    ]
+  },
+  {
+    path: 'projects',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'contract-drawings',
+        component: ContractDrawingsComponent,
+        data: { state: 'projects.contract-drawings' }
+      }
+    ]
+  },
+  {
+    path: 'projects',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'rfi',
+        component: RfiComponent,
+        data: { state: 'projects.rfi' }
+      }
+    ]
+  },
+  {
+    path: 'projects',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'cnn',
+        component: CnnComponent,
+        data: { state: 'projects.cnn' }
+      }
+    ]
+  },
+  {
+    path: 'projects',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'bfa',
+        component: BfaComponent,
+        data: { state: 'projects.bfa' }
+      }
+    ]
+  },
+  {
+    path: 'projects',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'tasks',
+        component: TasksComponent,
+        data: { state: 'projects.tasks' }
       }
     ]
   }

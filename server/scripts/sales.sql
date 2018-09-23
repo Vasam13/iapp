@@ -33,7 +33,7 @@ DROP TABLE  IF EXISTS sales;
 CREATE TABLE sales (
   sales_id INT(11) primary key auto_increment,
   client_id INT(11) NOT NULL,
-  bid_number varchar(45) NOT NULL,
+  bid_number varchar(45) NULL,
   project_name varchar(200) NOT NULL,
   project_address_line1 varchar(100) NOT NULL,
   project_address_line2 varchar(100) DEFAULT NULL,

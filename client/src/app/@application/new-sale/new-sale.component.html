@@ -516,24 +516,24 @@
             formGroupName="projectDetails"
           >
 
-          <div class="row clearfix">
-            <div class="col-md-12">
-              <div class="form-group form-group-default form-group-default-select2">
-                <label>Requirements</label>
-                <pg-select
-                  style="width: 100%;"
-                  [Mode]="'multiple'"
-                  formControlName="bidType"
-                >
-                  <pg-option
-                    *ngFor="let value of requirements"
-                    [Label]="value"
-                    [Value]="value"
-                  > </pg-option>
-                </pg-select>
+            <div class="row clearfix">
+              <div class="col-md-12">
+                <div class="form-group form-group-default form-group-default-select2">
+                  <label>Requirements</label>
+                  <pg-select
+                    style="width: 100%;"
+                    [Mode]="'multiple'"
+                    formControlName="bidType"
+                  >
+                    <pg-option
+                      *ngFor="let value of requirements"
+                      [Label]="value"
+                      [Value]="value"
+                    > </pg-option>
+                  </pg-select>
+                </div>
               </div>
             </div>
-          </div>
 
             <div class="row clearfix">
               <div class="col-md-6">
@@ -620,16 +620,15 @@
               <div class="col-md-12">
                 <div
                   pgFormGroupDefault
-                  class="form-group form-group-default required"
-                  [class.has-error]="isFieldValid(1, 'estimateLead')"
+                  class="form-group form-group-default"
                 >
+                  <!-- [class.has-error]="isFieldValid(1, 'estimateLead')" -->
                   <label>Estimator</label>
                   <pg-select
                     style="width: 100%;"
                     formControlName="estimateLead"
                     [PlaceHolder]="'Select Option'"
                     AllowClear
-                    required
                     ShowSearch
                   >
                     <pg-option
@@ -663,19 +662,22 @@
           <!-- End Bid Information-->
 
           <!-- Submit buttons-->
-          <div class="row clearfix m-t-20">
+          <div class="row clearfix m-t-20">{{countryStore.busy()}}
             <div class="col-sm-12 col-lg-12 col-md-12 text-center">
               <button
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="save('draft')"
+                disabled="countryStore.busy()"
               ><em class="icon-folder"></em>&nbsp;Save as Draft</button>
               <button
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="save('publish')"
+                disabled="isPageBusy()"
               ><em class="icon-share-alt"></em>&nbsp;Publish</button>
               <button
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="save('sendForEstimate')"
+                disabled="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Send for Estimation</button>
             </div>
           </div>

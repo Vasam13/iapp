@@ -31,13 +31,28 @@ export class GridComponent implements OnInit {
       mnth = ('0' + (date.getMonth() + 1)).slice(-2),
       day = ('0' + date.getDate()).slice(-2);
     return [date.getFullYear(), mnth, day].join('/');
-  }
+  };
 
   isVisible(row, md) {
     if (md.visible) {
       return md.visible(row, md);
     }
     return true;
+  }
+
+  isSelectColumn(md) {
+    return md.type === 'select' && md.dropDownConfiguration;
+  }
+
+  getSelectDisplayValue(row, md) {
+    if (!this.isSelectColumn(md)) {
+      return '';
+    }
+    const config = md.dropDownConfiguration;
+    const fil = config.store.rows.filter(
+      selectRow => row[md.column] === selectRow[config.valueColumn]
+    );
+    return fil.length > 0 ? fil[0][config.displayColumn] : '';
   }
 
   filterStoreRows(store: Store) {

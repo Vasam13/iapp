@@ -626,16 +626,15 @@
               <div class="col-md-12">
                 <div
                   pgFormGroupDefault
-                  class="form-group form-group-default required"
-                  [class.has-error]="isFieldValid(1, 'estimateLead')"
+                  class="form-group form-group-default"
                 >
+                  <!-- [class.has-error]="isFieldValid(1, 'estimateLead')" -->
                   <label>Estimation Lead</label>
                   <pg-select
                     style="width: 100%;"
                     formControlName="estimateLead"
                     [PlaceHolder]="'Select Option'"
                     AllowClear
-                    required
                     ShowSearch
                   >
                     <pg-option
@@ -1220,56 +1219,67 @@
                 *ngIf="visibleSaveAsDraftBtn()"
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="saveAsDraft()"
+                disabled="isPageBusy()"
               ><em class="icon-folder"></em>&nbsp;Save as Draft</button>
               <button
                 *ngIf="visibleSalesPublishBtn()"
                 (click)="publishLead()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-share-alt"></em>&nbsp;Publish</button>
               <button
                 *ngIf="visiableSendForEstimationBtn()"
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="sendLeadForEstimation()"
+                disabled="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Send for Estimation</button>
               <button
                 *ngIf="visibleSaveEstimationBtn()"
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="saveEstimation()"
+                disabled="isPageBusy()"
               ><em class="icon-folder"></em>&nbsp;Save Estimation</button>
               <button
                 *ngIf="visibleStartEstimationBtn()"
                 (click)="startEstimation()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-arrow-right"></em>&nbsp;Start Estimation</button>
               <button
                 *ngIf="isEstimationManager()"
                 (click)="assignEstimaor()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-user"></em>&nbsp;Assign Estimator</button>
               <button
                 *ngIf="visibleCompleteEstimationBtn()"
                 (click)="completeEstimation()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Complete Estimation</button>
               <button
                 *ngIf="visibleStartQuoteBtn()"
                 (click)="startQuotation()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-arrow-right"></em>&nbsp;Start Quotation</button>
               <button
                 *ngIf="visibleCompleteQuoteBtn()"
                 (click)="saveQuotation()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-folder"></em>&nbsp;Save Quotation</button>
               <button
                 *ngIf="visibleCompleteQuoteBtn()"
                 (click)="completeQuotation()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Complete Quotation</button>
               <button
                 *ngIf="visibleCloseLeadeBtn()"
                 (click)="closeLeadModal.show()"
                 class="btn btn-rounded btn-primary m-r-10"
+                disabled="isPageBusy()"
               ><em class="icon-check"></em>&nbsp;Close Lead</button>
             </div>
           </div>

@@ -96,14 +96,13 @@
             </div>
           </div> -->
         <select
-          *ngIf="md.type === 'select' && md.dropDownConfiguration"
+          *ngIf="isSelectColumn(md) && store.isEditable(row, md)"
           (onchange)="store.clickHandler(row, md)"
           (click)="store.setCurrentColumn(rowIndex, columnIndex)"
           class="gird-cell-editor"
           [ngClass]="{ 'current-row': store.isCurrentRow(rowIndex), 'first-column': columnIndex===0}"
           (blur)="store.resetCurrentColumn()"
           [(ngModel)]="row[md.column]"
-          [disabled]="!store.isEditable(row, md)"
           AllowClear
           ShowSearch
         >
@@ -114,6 +113,17 @@
           >
           </option>
         </select>
+        <div
+          *ngIf="isSelectColumn(md) && !store.isEditable(row, md)"
+          class="gird-cell-editor"
+          (click)="store.setCurrentColumn(rowIndex, columnIndex)"
+          [ngClass]="{ 'current-row': store.isCurrentRow(rowIndex), 'first-column': columnIndex===0}"
+          (click)="store.clickHandler(row, md)"
+        >
+          <span class="select-readyonly">
+            {{getSelectDisplayValue(row, md)}}
+          </span>
+        </div>
         <!-- <pg-select
           *ngIf="md.type === 'select' && md.dropDownConfiguration"
           style="width: 100%;"

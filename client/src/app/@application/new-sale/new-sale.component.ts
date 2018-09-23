@@ -6,7 +6,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { StoreService } from '@StoreService';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import {Utils} from '@utils';
+import { Utils } from '@utils';
 import ClientsType from './../tables/types/ClientsType';
 import SalesType from './../tables/types/SalesType';
 import { DataUtils } from '../data';
@@ -33,6 +33,17 @@ export class NewSaleComponent implements OnInit, OnDestroy {
   statesStore: Store;
 
   requirements = ['Structural', 'Engineering', 'Miscellaneous'];
+
+  isPageBusy() {
+    return (
+      // this.salesStore.isBusy ||
+      // this.clientStore.isBusy ||
+      // this.salesPersonStore.isBusy ||
+      // this.estimationLeadsStore.isBusy ||
+      this.countryStore.isBusy
+      // this.statesStore.isBusy
+    );
+  }
 
   gotoSales() {
     this.router.navigate(['/sales']);

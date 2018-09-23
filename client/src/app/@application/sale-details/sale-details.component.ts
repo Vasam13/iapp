@@ -1,6 +1,6 @@
 import { Row, QueryOperation, Roles, Functions, LeadStatus } from '@types';
 import { MessageService } from '@message';
-import {Utils} from '@utils';
+import { Utils } from '@utils';
 import { Store, Status } from '@types';
 import { StoreService } from '@StoreService';
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
@@ -33,6 +33,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   startEstimate = false;
   startQuotaion = false;
   public saleId: number;
+
   salesStore: Store;
   clientStore: Store;
   estimationStore: Store;
@@ -64,6 +65,21 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
 
   estimationEditing = false;
   quotationEditing = false;
+
+  isPageBusy() {
+    return (
+      this.salesStore.isBusy ||
+      this.clientStore.isBusy ||
+      this.estimationStore.isBusy ||
+      this.quotesStore.isBusy ||
+      this.salesPersonStore.isBusy ||
+      this.estimationLeadsStore.isBusy ||
+      this.estimatorsStore.isBusy ||
+      this.countryStore.isBusy ||
+      this.statesStore.isBusy ||
+      this.exclusionsInclusionsStore.isBusy
+    );
+  }
 
   filter(type: string) {
     const filtered = [];
@@ -729,7 +745,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
         }
       }
     }
-  }
+  };
 
   filterCountry(countryName: string) {
     if (this.countryStore && this.countryStore.rows) {
