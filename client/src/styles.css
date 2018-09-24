@@ -136,3 +136,19 @@ select[disabled] {
   cursor: text;
   background: #fff;
 }
+
+.pg-select-disabled .pg-select-selection {
+  background: #fff !important;
+}
+
+.pg-select-disabled
+  .pg-select-selection--multiple
+  .pg-select-selection__choice {
+  color: #626262 !important;
+  background-color: #e6e6e6 !important;
+}
+
+.form-group-default.focused {
+  border-color: none !important;
+  background-color: #fff !important;
+}

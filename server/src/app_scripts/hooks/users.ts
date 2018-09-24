@@ -100,27 +100,33 @@ export default class users extends Table {
     });
   }
 
-  public async afterUpdate(_row: Row) {
-    const row: Users = <Users>_row;
-    // Write your code below
+  public async afterUpdate(_row: Row): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const row: Users = <Users>_row;
+      // Write your code below
 
-    //Don't change below line
-    return Promise.resolve();
+      //Don't change below line
+      return resolve();
+    });
   }
 
-  public async beforeDelete(_row: Row) {
-    const row: Users = <Users>_row;
-    // Write your code below
+  public async beforeDelete(_row: Row): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const row: Users = <Users>_row;
+      // Write your code below
 
-    //Don't change below line
-    return Promise.resolve();
+      //Don't change below line
+      return resolve();
+    });
   }
 
-  public async afterDelete(_row: Row) {
-    const row: Users = <Users>_row;
-    // Write your code below
+  public async afterDelete(_row: Row): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const row: Users = <Users>_row;
+      // Write your code below
 
-    //Don't change below line
-    return Promise.resolve();
+      //Don't change below line
+      return resolve();
+    });
   }
 }

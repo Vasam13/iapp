@@ -37,16 +37,18 @@ export default class sales extends Table {
     return new Promise((resolve, reject) => {
       const row: Sales = <Sales>_row;
       delete row['pdf'];
-      return Promise.resolve();
+      return resolve();
     });
   }
 
-  public async beforeInsert(_row: Row) {
-    const row: Sales = <Sales>_row;
-    // Write your code below
+  public async beforeInsert(_row: Row): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const row: Sales = <Sales>_row;
+      // Write your code below
 
-    //Don't change below line
-    return Promise.resolve();
+      //Don't change below line
+      return resolve();
+    });
   }
 
   public async afterInsert(_row: Row): Promise<any> {
@@ -55,16 +57,18 @@ export default class sales extends Table {
       // Write your code
 
       //Don't change below line
-      return Promise.resolve();
+      return resolve();
     });
   }
 
-  public async beforeUpdate(_row: Row) {
-    const row: Sales = <Sales>_row;
-    // Write your code below
+  public async beforeUpdate(_row: Row): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const row: Sales = <Sales>_row;
+      // Write your code below
 
-    //Don't change below line
-    return Promise.resolve();
+      //Don't change below line
+      return resolve();
+    });
   }
 
   public async afterUpdate(_row: Row): Promise<any> {
@@ -86,19 +90,23 @@ export default class sales extends Table {
     });
   }
 
-  public async beforeDelete(_row: Row) {
-    const row: Sales = <Sales>_row;
-    // Write your code below
+  public async beforeDelete(_row: Row): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const row: Sales = <Sales>_row;
+      // Write your code below
 
-    //Don't change below line
-    return Promise.resolve();
+      //Don't change below line
+      return resolve();
+    });
   }
 
-  public async afterDelete(_row: Row) {
-    const row: Sales = <Sales>_row;
-    // Write your code below
+  public async afterDelete(_row: Row): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const row: Sales = <Sales>_row;
+      // Write your code below
 
-    //Don't change below line
-    return Promise.resolve();
+      //Don't change below line
+      return resolve();
+    });
   }
 }

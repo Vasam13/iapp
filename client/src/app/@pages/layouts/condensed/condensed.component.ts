@@ -23,8 +23,15 @@ export class CondensedComponent extends RootLayout implements OnInit {
     Utils.getMenuStates(this.router).forEach((state: State) => {
       this.menuLinks.push(state.menu);
     });
-    const authorizedURL = Utils.getAuthorizedURL(this.router);
-    this.router.navigate([authorizedURL]);
+    const authorizedState = Utils.getAuthorizedState(this.router);
+    const routerState = Utils.getStateData(this.router);
+    if (
+      !authorizedState.state ||
+      !routerState ||
+      routerState !== authorizedState.state
+    ) {
+      this.router.navigate([authorizedState.url]);
+    }
   }
 
   _logOut() {

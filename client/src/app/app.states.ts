@@ -44,7 +44,12 @@ export const AppStates: States = [
     state: 'sales',
     url: '/sales',
     isHome: 'Y',
-    roleCodes: [Roles.SALES_MANAGER, Roles.SALES_PERSON],
+    roleCodes: [
+      Roles.SALES_MANAGER,
+      Roles.SALES_PERSON,
+      Roles.ESTIMATION_MANAGER,
+      Roles.ESTIMATOR
+    ],
     menu: {
       routerLink: '/sales',
       label: 'Sales',
@@ -59,9 +64,14 @@ export const AppStates: States = [
     roleCodes: [Roles.SALES_MANAGER, Roles.SALES_PERSON]
   },
   {
-    state: 'sales.:id',
+    state: 'sales.id',
     url: '/sales/id',
-    roleCodes: [Roles.SALES_MANAGER, Roles.SALES_PERSON]
+    roleCodes: [
+      Roles.SALES_MANAGER,
+      Roles.SALES_PERSON,
+      Roles.ESTIMATION_MANAGER,
+      Roles.ESTIMATOR
+    ]
   },
   {
     state: 'clients',

@@ -1,5 +1,5 @@
 import { DataUtils } from './../data';
-import {Utils} from '@utils';
+import { Utils } from '@utils';
 import { Store, Status, LeadStatus, Roles } from '@types';
 import { ColumnMetaData, ColumnType } from '@types';
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -129,7 +129,10 @@ export class SalesComponent implements OnInit, OnDestroy {
       ) {
         badge = 'warning';
       }
-      if (row.status === LeadStatus.REQUEST_FOR_ESTIMATION) {
+      if (
+        row.status === LeadStatus.REQUEST_FOR_ESTIMATION ||
+        row.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION
+      ) {
         badge = 'success';
       }
       if (row.status === LeadStatus.QUOTED) {

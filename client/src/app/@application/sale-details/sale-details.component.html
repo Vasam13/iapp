@@ -254,7 +254,7 @@
                     class="form-control"
                     name="projectName"
                     formControlName="projectName"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                     required
                   >
                 </div>
@@ -274,7 +274,7 @@
                     class="form-control"
                     name="projectContactName"
                     formControlName="projectContactName"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                     required
                   >
                 </div>
@@ -290,7 +290,7 @@
                     class="form-control"
                     name="projectContactEmail"
                     formControlName="projectContactEmail"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                   > </div>
               </div>
             </div>
@@ -307,7 +307,7 @@
                     class="form-control"
                     name="projectPhone1CountryCode"
                     formControlName="projectPhone1CountryCode"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                   > </div>
               </div>
               <div class="col-md-4">
@@ -322,7 +322,7 @@
                     class="form-control"
                     name="projectPhone1Number"
                     formControlName="projectPhone1Number"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                     required
                   >
                 </div>
@@ -338,7 +338,7 @@
                     class="form-control"
                     name="projectPhone1Ext"
                     formControlName="projectPhone1Ext"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                   > </div>
               </div>
             </div>
@@ -355,7 +355,7 @@
                     class="form-control"
                     name="projectPhone2CountryCode"
                     formControlName="projectPhone2CountryCode"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                   > </div>
               </div>
               <div class="col-md-4">
@@ -369,7 +369,7 @@
                     class="form-control"
                     name="projectPhone2Number"
                     formControlName="projectPhone2Number"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                   > </div>
               </div>
               <div class="col-md-4">
@@ -383,7 +383,7 @@
                     class="form-control"
                     name="projectPhone2Ext"
                     formControlName="projectPhone2Ext"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                   > </div>
               </div>
             </div>
@@ -401,7 +401,7 @@
                     class="form-control"
                     name="projectAddressLine1"
                     formControlName="projectAddressLine1"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    (readonly)="readOnlyProjectDetails()"
                     required
                   >
                 </div>
@@ -417,7 +417,7 @@
                     class="form-control"
                     name="projectAddressLine2"
                     formControlName="projectAddressLine2"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    (readonly)="readOnlyProjectDetails()"
                   > </div>
               </div>
             </div>
@@ -437,7 +437,7 @@
                     [PlaceHolder]="'Select Option'"
                     AllowClear
                     ShowSearch
-                    (disabled)="!visibleSalesPublishBtn()"
+                    [Disabled]="readOnlyProjectDetails()"
                     required
                   >
                     <pg-option
@@ -461,7 +461,7 @@
                     [PlaceHolder]="'Select Option'"
                     AllowClear
                     ShowSearch
-                    (disabled)="!visibleSalesPublishBtn()"
+                    [Disabled]="readOnlyProjectDetails()"
                   >
                     <pg-option
                       *ngFor="let state of statesStore.rows"
@@ -485,7 +485,7 @@
                     class="form-control"
                     name="projectCity"
                     formControlName="projectCity"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readOnly]="readOnlyProjectDetails()"
                     required
                   >
                 </div>
@@ -501,7 +501,7 @@
                     class="form-control"
                     name="projectZip"
                     formControlName="projectZip"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyProjectDetails()"
                   > </div>
               </div>
             </div>
@@ -523,6 +523,7 @@
                     style="width: 100%;"
                     [Mode]="'multiple'"
                     formControlName="bidType"
+                    [Disabled]="readOnlyBidDetails()"
                   >
                     <pg-option
                       *ngFor="let value of requirements"
@@ -543,7 +544,7 @@
                   <label>Received Date</label>
                   <pg-datepicker
                     formControlName="bidReceivedDate"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [Disabled]="readOnlyBidDetails()"
                   ></pg-datepicker>
                 </div>
               </div>
@@ -555,7 +556,7 @@
                   <label>Due Date</label>
                   <pg-datepicker
                     formControlName="bidDueDate"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [Disabled]="readOnlyBidDetails()"
                   ></pg-datepicker>
                 </div>
               </div>
@@ -574,7 +575,7 @@
                     class="form-control"
                     name="documentPath"
                     formControlName="documentPath"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyBidDetails()"
                   >
                 </div>
               </div>
@@ -589,7 +590,7 @@
                     class="form-control"
                     name="documentReceived"
                     formControlName="documentReceived"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyBidDetails()"
                   >
                 </div>
               </div>
@@ -611,6 +612,7 @@
                     [PlaceHolder]="'Select Option'"
                     AllowClear
                     ShowSearch
+                    [Disabled]="readOnlyBidDetails()"
                   >
                     <pg-option
                       *ngFor="let salesPerson of salesPersonStore.rows"
@@ -636,6 +638,7 @@
                     [PlaceHolder]="'Select Option'"
                     AllowClear
                     ShowSearch
+                    [Disabled]="readOnlyBidDetails()"
                   >
                     <pg-option
                       *ngFor="let estimationLead of estimationLeadsStore.rows"
@@ -662,8 +665,8 @@
                     formControlName="estimator"
                     [PlaceHolder]="'Select Option'"
                     AllowClear
-                    required
                     ShowSearch
+                    [Disabled]="readOnlyBidDetails('estimator')"
                   >
                     <pg-option
                       *ngFor="let estimator of estimatorsStore.rows"
@@ -687,7 +690,7 @@
                     class="form-control"
                     name="salesRemarks"
                     formControlName="salesRemarks"
-                    (readonly)="!visibleSalesPublishBtn()"
+                    [readonly]="readOnlyBidDetails()"
                   ></textarea>
                 </div>
               </div>
@@ -712,11 +715,12 @@
                 <div class="row clearfix">
                   <div class="col-md-12">
                     <div class="form-group form-group-default form-group-default-select2">
-                      <label>MainSteel Inclusions</label>
+                      <label>MainSteel Inclusionsl</label>
                       <pg-select
                         style="width: 100%;"
-                        [Mode]="'multiple'"
+                        Mode="multiple"
                         formControlName="mainSteelInclusions"
+                        Disabled="true"
                       >
                         <pg-option
                           *ngFor="let row of filter('main_inclusions')"
@@ -734,8 +738,9 @@
                       <label>MainSteel Exclusions</label>
                       <pg-select
                         style="width: 100%;"
-                        [Mode]="'multiple'"
+                        Mode="multiple"
                         formControlName="mainSteelExclusions"
+                        Disabled="true"
                       >
                         <pg-option
                           *ngFor="let row of filter('main_exclusions')"
@@ -753,8 +758,9 @@
                       <label>Misc.Steel Inclusions</label>
                       <pg-select
                         style="width: 100%;"
-                        [Mode]="'multiple'"
+                        Mode="multiple"
                         formControlName="miscSteelInclusions"
+                        Disabled="true"
                       >
                         <pg-option
                           *ngFor="let row of filter('misc_inclusions')"
@@ -772,8 +778,9 @@
                       <label>Main Steel Exclusion</label>
                       <pg-select
                         style="width: 100%;"
-                        [Mode]="'multiple'"
+                        Mode="multiple"
                         formControlName="miscSteelExclusions"
+                        Disabled="true"
                       >
                         <pg-option
                           *ngFor="let row of filter('misc_exclusions')"
@@ -806,7 +813,7 @@
                       pgFormGroupDefault
                       class="form-group form-group-default required"
                     >
-                      <label>MainSteel Schedule</label>
+                      <label>MainSteel Schedule (In Weeks)</label>
                       <input
                         type="text"
                         class="form-control"
@@ -836,7 +843,7 @@
                       pgFormGroupDefault
                       class="form-group form-group-default required"
                     >
-                      <label>Misc. Schedule</label>
+                      <label>Misc. Schedule (In Weeks)</label>
                       <input
                         type="text"
                         class="form-control"
@@ -989,7 +996,7 @@
                     class="form-group form-group-default required"
                     [class.has-error]="isFieldValid(2, 'mainSteelSchedule')"
                   >
-                    <label>MainSteel Schedule</label>
+                    <label>MainSteel Schedule (In Weeks)</label>
                     <input
                       type="text"
                       class="form-control"
@@ -1021,7 +1028,7 @@
                     class="form-group form-group-default required"
                     [class.has-error]="isFieldValid(2, 'miscSteelSchedule')"
                   >
-                    <label>Misc. Schedule</label>
+                    <label>Misc. Schedule (In Weeks)</label>
                     <input
                       type="text"
                       class="form-control"
@@ -1219,67 +1226,74 @@
                 *ngIf="visibleSaveAsDraftBtn()"
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="saveAsDraft()"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-folder"></em>&nbsp;Save as Draft</button>
               <button
                 *ngIf="visibleSalesPublishBtn()"
                 (click)="publishLead()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-share-alt"></em>&nbsp;Publish</button>
               <button
                 *ngIf="visiableSendForEstimationBtn()"
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="sendLeadForEstimation()"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Send for Estimation</button>
               <button
                 *ngIf="visibleSaveEstimationBtn()"
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="saveEstimation()"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-folder"></em>&nbsp;Save Estimation</button>
               <button
                 *ngIf="visibleStartEstimationBtn()"
                 (click)="startEstimation()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-arrow-right"></em>&nbsp;Start Estimation</button>
               <button
                 *ngIf="isEstimationManager()"
                 (click)="assignEstimaor()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-user"></em>&nbsp;Assign Estimator</button>
               <button
                 *ngIf="visibleCompleteEstimationBtn()"
                 (click)="completeEstimation()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Complete Estimation</button>
+              <button
+                *ngIf="visibleSendReEstimationBtn()"
+                (click)="sendLeadForReEstimation()"
+                class="btn btn-rounded btn-primary m-r-10"
+                [disabled]="isPageBusy()"
+              ><em class="icon-refresh"></em>&nbsp;Send For Re-Estimatation</button>
               <button
                 *ngIf="visibleStartQuoteBtn()"
                 (click)="startQuotation()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-arrow-right"></em>&nbsp;Start Quotation</button>
+
               <button
                 *ngIf="visibleCompleteQuoteBtn()"
                 (click)="saveQuotation()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-folder"></em>&nbsp;Save Quotation</button>
               <button
                 *ngIf="visibleCompleteQuoteBtn()"
                 (click)="completeQuotation()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Complete Quotation</button>
               <button
                 *ngIf="visibleCloseLeadeBtn()"
                 (click)="closeLeadModal.show()"
                 class="btn btn-rounded btn-primary m-r-10"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-check"></em>&nbsp;Close Lead</button>
             </div>
           </div>

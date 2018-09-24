@@ -395,25 +395,28 @@ export class Utils {
     });
   }
 
-  static getAuthorizedURL(router: Router): string {
+  static getAuthorizedState(router: Router): Map {
     const restrictURL = '/restricted';
     const myStates = this.getMyStates();
     if (myStates.length === 0) {
-      return restrictURL;
+      return { url: restrictURL };
     }
     const url = router.url;
     if (!url || url.trim().length === 0 || url === '/') {
-      const homeUrl = myStates.filter(entry => entry.isHome === 'Y');
-      return homeUrl.length > 0 ? homeUrl[0].url : myStates[0].url;
+      const homeUrls = myStates.filter(entry => entry.isHome === 'Y');
+      const _url = homeUrls.length > 0 ? homeUrls[0].url : myStates[0].url;
+      return { url: _url, state: myStates[0].state };
     }
     const routerState = this.getStateData(router);
-    let authUrl;
+    let authUrl, _state;
     for (let i = 0; i < myStates.length; i++) {
       const myState = myStates[i];
       if (myState.state === routerState) {
         authUrl = myState.url;
+        _state = myState.state;
       }
     }
-    return authUrl ? authUrl : restrictURL;
+    authUrl = authUrl ? authUrl : restrictURL;
+    return { url: authUrl, state: _state };
   }
 }

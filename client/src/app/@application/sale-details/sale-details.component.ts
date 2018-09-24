@@ -97,12 +97,27 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
     return Utils.hasAnyRole([Roles.SALES_MANAGER]);
   }
 
+  isSalesPerson() {
+    return Utils.hasAnyRole([Roles.SALES_PERSON]);
+  }
+
   isEstimationManager() {
     return Utils.hasAnyRole([Roles.ESTIMATION_MANAGER]);
   }
 
   isEstimatior() {
     return Utils.hasAnyRole([Roles.ESTIMATION_MANAGER, Roles.ESTIMATOR]);
+  }
+
+  readOnlyBidDetails(label) {
+    if (label === 'estimator') {
+      return !this.isEstimationManager();
+    }
+    return !(this.isSalesManager() || this.isSalesPerson());
+  }
+
+  readOnlyProjectDetails() {
+    return !(this.isSalesManager() || this.isSalesPerson());
   }
 
   visibleSaveAsDraftBtn() {
@@ -139,8 +154,10 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
       if (this.salesRow && this.salesRow.status) {
         if (
           (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION ||
+            this.salesRow.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION ||
+            this.salesRow.status === LeadStatus.ESTIMATED ||
             this.salesRow.status === LeadStatus.QUOTED) &&
-          this.quotations.length > 0
+          this.estimations.length > 0
         ) {
           return true;
         }
@@ -192,6 +209,17 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
 
   visibleCompleteEstimationBtn() {
     return this.visibleSaveEstimationBtn();
+  }
+
+  visibleSendReEstimationBtn() {
+    if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
+      if (this.salesRow && this.salesRow.status) {
+        if (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   visibleStartQuoteBtn() {
@@ -266,7 +294,30 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   sendLeadForEstimation() {
     if (this.isFormValid()) {
       const salesRow: SalesType = this.salesForm.value.projectDetails;
+      if (!salesRow.estimateLead) {
+        Utils.notifyError(
+          this.message,
+          'Error',
+          'Please assign Estimation Lead!'
+        );
+        return;
+      }
       salesRow.status = LeadStatus.REQUEST_FOR_ESTIMATION;
+      this._saveSalesRow(salesRow);
+    }
+  }
+  sendLeadForReEstimation() {
+    if (this.isFormValid()) {
+      const salesRow: SalesType = this.salesForm.value.projectDetails;
+      if (!salesRow.estimateLead) {
+        Utils.notifyError(
+          this.message,
+          'Error',
+          'Please assign Estimation Lead!'
+        );
+        return;
+      }
+      salesRow.status = LeadStatus.REQUEST_FOR_RE_ESTIMATION;
       this._saveSalesRow(salesRow);
     }
   }
@@ -293,6 +344,10 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
     estimateRow.$operation$ = QueryOperation.UPDATE;
     if (!estimateRow.id) {
       estimateRow.$operation$ = QueryOperation.INSERT;
+    }
+    estimateRow.versionNumber = this.estimations.length;
+    if (estimateRow.versionNumber === 0) {
+      estimateRow.versionNumber = 1;
     }
     estimateRow.salesId = salesRow.salesId;
     estimateRow.mainSteelInclusions = this.arrayToString(

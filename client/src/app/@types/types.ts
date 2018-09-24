@@ -284,6 +284,7 @@ export enum LeadStatus {
   DRAFT = 'Draft',
   OPEN = 'Open',
   REQUEST_FOR_ESTIMATION = 'For Estimation',
+  REQUEST_FOR_RE_ESTIMATION = 'For Re-Estimation',
   ESTIMATED = 'Estimated',
   REQUEST_FOR_QUOTATION = 'For Quotation',
   QUOTED = 'Quoted',

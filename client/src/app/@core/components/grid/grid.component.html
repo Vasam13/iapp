@@ -29,6 +29,7 @@
       >
         <div
           *ngIf="md.type === 'template' && md.templateConfiguration"
+          style="text-align: center"
           class="gird-cell-editor"
           (click)="store.setCurrentColumn(rowIndex, columnIndex)"
           [ngClass]="{ 'current-row': store.isCurrentRow(rowIndex), 'first-column': columnIndex===0}"
@@ -113,7 +114,7 @@
           >
           </option>
         </select>
-        <div
+        <!-- <div
           *ngIf="isSelectColumn(md) && !store.isEditable(row, md)"
           class="gird-cell-editor"
           (click)="store.setCurrentColumn(rowIndex, columnIndex)"
@@ -123,7 +124,19 @@
           <span class="select-readyonly">
             {{getSelectDisplayValue(row, md)}}
           </span>
-        </div>
+        </div> -->
+        <input
+          *ngIf="isSelectColumn(md) && !store.isEditable(row, md)"
+          autofocus
+          [style]="md.style"
+          [readonly]="true"
+          class="gird-cell-editor"
+          (click)="store.setCurrentColumn(rowIndex, columnIndex);store.clickHandler(row,md)"
+          [ngClass]="{ 'current-row': store.isCurrentRow(rowIndex), 'first-column': columnIndex===0}"
+          (blur)="store.resetCurrentColumn()"
+          type="text"
+          [value]="getSelectDisplayValue(row, md)"
+        />
         <!-- <pg-select
           *ngIf="md.type === 'select' && md.dropDownConfiguration"
           style="width: 100%;"
