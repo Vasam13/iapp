@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --proxy-config proxy.conf.json",
+    "start": "ng serve --proxy-config proxy.conf.json --poll=2000",
     "clean": "rm -rf ./../iapp/public/*",
     "build-prod": "npm run clean && ng build --prod",
     "build-client-prod": "npm run build-prod",

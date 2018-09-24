@@ -36,12 +36,12 @@ export class NewSaleComponent implements OnInit, OnDestroy {
 
   isPageBusy() {
     return (
-      // this.salesStore.isBusy ||
-      // this.clientStore.isBusy ||
-      // this.salesPersonStore.isBusy ||
-      // this.estimationLeadsStore.isBusy ||
-      this.countryStore.isBusy
-      // this.statesStore.isBusy
+      this.salesStore.isBusy ||
+      this.clientStore.isBusy ||
+      this.salesPersonStore.isBusy ||
+      this.estimationLeadsStore.isBusy ||
+      this.countryStore.isBusy ||
+      this.statesStore.isBusy
     );
   }
 

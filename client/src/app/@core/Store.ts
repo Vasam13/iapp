@@ -327,10 +327,6 @@ class StoreImpl implements Store {
     return [date.getFullYear(), mnth, day].join('-');
   }
 
-  public busy() {
-    return this.isBusy;
-  }
-
   public query(): Promise<QueryResponse> {
     return new Promise((resolve, reject) => {
       if (this.isDirty) {

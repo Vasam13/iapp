@@ -662,22 +662,22 @@
           <!-- End Bid Information-->
 
           <!-- Submit buttons-->
-          <div class="row clearfix m-t-20">{{countryStore.busy()}}
+          <div class="row clearfix m-t-20">
             <div class="col-sm-12 col-lg-12 col-md-12 text-center">
               <button
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="save('draft')"
-                disabled="countryStore.busy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-folder"></em>&nbsp;Save as Draft</button>
               <button
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="save('publish')"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-share-alt"></em>&nbsp;Publish</button>
               <button
                 class="btn btn-rounded btn-primary m-r-10"
                 (click)="save('sendForEstimate')"
-                disabled="isPageBusy()"
+                [disabled]="isPageBusy()"
               ><em class="icon-share"></em>&nbsp;Send for Estimation</button>
             </div>
           </div>

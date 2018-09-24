@@ -1,5 +1,6 @@
 import { CODE } from '@code';
 import { Observable } from 'rxjs/Observable';
+import { NgZone } from '@angular/core';
 
 export interface Store {
   isBusy: boolean;
@@ -17,7 +18,6 @@ export interface Store {
   orderByClause: string;
   // currentRow: Row;
   columnsMD: ColumnMetaData<Map>[];
-  busy();
   getDirtyRows(): Row[];
   onRowSelect(val: any): void;
   deleteSelected();
