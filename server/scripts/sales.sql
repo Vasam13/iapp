@@ -239,6 +239,29 @@ CREATE TABLE EMAIL_ACTIONS(
     update_user_id int(11) NOT NULL
 );
 
+DROP TABLE IF EXISTS GLOBAL_TEMPLATES;
+CREATE TABLE GLOBAL_TEMPLATES(
+	id INT(11) PRIMARY KEY auto_increment,
+    template_code varchar(100) UNIQUE NOT NULL,
+    title varchar(1000) NULL,
+	content varchar(2000) NOT NULL,
+    create_date datetime NOT NULL,
+    create_user_id int(11) NOT NULL,
+    update_date datetime NOT NULL,
+    update_user_id int(11) NOT NULL
+);
+INSERT INTO global_templates(`template_code`,`title`,`content`,`create_date`,`create_user_id`,`update_date`,`update_user_id`) VALUES
+('pdf_requirements_from_client','REQUIREMENTS FROM THE CLIENT','<ol><li>Detailing Standards</li><li>Released for Construction set</li><li>All Addendums and Bulletins if</li><li>General Contractor name</li><li>Job Number</li><li>Drawing sheet layout and requirements</li><li>Drawing Template</li></ol>',SYSDATE(),1,SYSDATE(),1),
+('pdf_approval_set','OUR APPROVAL SET ALWAYS COMES WITH','<ol><li>Submittal log</li><li>Contract Drawings log</li><li>RFI (If any)</li><li>RFI log (If any)</li></ol>',SYSDATE(),1,SYSDATE(),1),
+('pdf_deliver_checks','DELIVER CHECKS','<ol><li>NC1 Files,</li><li>Kiss Files,</li><li>PDF,</li><li>CNC Files,</li><li>EJE Files,</li><li>Calculation if required (No Stamping)</li><li>Steel Member cut list</li><li>Field Bolt List</li><li>Shop Bolt list</li><li>Sequencing jobs, sequence list</li><li>DXF files for your plasma</li></ol>',SYSDATE(),1,SYSDATE(),1),
+('pdf_lead_time','LEADTIME & MILESTONES','<p><strong>Detailing Schedule </strong></p><p><strong>X + {mainsteelschedule} Weeks (Main Steel for Approval) </strong></p><p><strong>&nbsp,&nbsp,+ {</strong><strong style=''color: rgb(0, 0, 0),''>miscsteelschedule</strong><strong>} Weeks (Misc. Steel for Approval) </strong></p><p><strong>X = Purchase Order release date and final drawings set confirmation.</strong></p>',SYSDATE(),1,SYSDATE(),1),
+('pdf_detailing_price','DETAILING PRICE ','<p><strong>Main Steel USD: {mainsteelprice}</strong></p><p><strong> Misc. Steel USD: {miscsteelprice}</strong></p>',SYSDATE(),1,SYSDATE(),1),
+('pdf_payment_terms','PAYMENT TERMS','<p>1) On Submission of Shop Drawings – 100%</p><p><br></p><p>All Invoices should be paid within 30 Days net after release for final approval. </p><p><br></p><p>All Cheques shall be sent to the below address </p><p><br></p><p>3S Services Group</p><p>733 Telemark Trial,</p><p>Frisco, TX 75034.</p><p>Phone: - 630-881-2687</p>',SYSDATE(),1,SYSDATE(),1),
+('pdf_change_orders','CHANGE ORDERS','<p>Depending on the Job requirement regarding the extra work incurred, additional amount of money would be charged on the extra hour. All these charges would be sent in the form of a <strong>CHANGE ORDER</strong> for approval from client.</p><p><br></p><p>Change Order will be $50.00 per Hr. Minor Changes are not Change Orders. Shop Mistakes, field miss fit-ups, Solution will be provided at no cost.&nbsp,</p>',SYSDATE(),1,SYSDATE(),1),
+('pdf_contact_details','CONTACT DETAILS FOR COMMUNICATION','<p>{executive}</p><p> Senior Sales Executive </p><p>3S Services Group LLC </p><p>733 Telemark Trial, </p><p>Frisco, TX 75034. </p><p>Direct: +1.972-370-3067 </p><p>Phone: 972-737-8088, Ext:210</p><p> Email: {email}</p><p>Website: www.3ssteelservices.com</p><p><br></p><p>This Proposal is valid for 30Days.</p>',SYSDATE(),1,SYSDATE(),1),
+('pdf_accepted','ACCEPTED','<p>sign:-_______________________________</p><p><br></p><p>Title_______________________________</p><p><br></p><p> </p><p>Company : __________________________</p><p><br></p><p> </p><p>P.O #______________________________</p>',SYSDATE(),1,SYSDATE(),1);
+
+
 
 DROP TABLE IF exists exclusions_inclusions;
 CREATE TABLE `exclusions_inclusions` (
@@ -286,6 +309,20 @@ CREATE TABLE `sales_comments` (
    `id` int(11) primary key auto_increment,
    `sales_id` int(11) NOT NULL,
    `comment` varchar(2000) DEFAULT NULL,
+   `create_date` datetime NOT NULL,
+   `create_user_id` int(11) NOT NULL,
+   `update_date` datetime NOT NULL,
+   `update_user_id` int(11) NOT NULL
+);
+
+DROP TABLE IF exists sales_notes;
+CREATE TABLE `sales_notes` (
+   `id` int(11) primary key auto_increment,
+   `sales_id` int(11) NOT NULL,
+   `code` varchar(200) NOT NULL,
+   `title` varchar(200) NOT NULL,
+   `content` varchar(2000) NOT NULL,
+   `position` int(11) NOT NULL,
    `create_date` datetime NOT NULL,
    `create_user_id` int(11) NOT NULL,
    `update_date` datetime NOT NULL,

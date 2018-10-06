@@ -20,6 +20,7 @@
       [name]="md.title"
       *ngFor="let md of store.columnsMD;  let columnIndex = index"
       [sortable]="md.sortable"
+      [maxWidth]="md.maxWidth"
     >
       <ng-template
         ngx-datatable-cell-template

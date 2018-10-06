@@ -94,6 +94,7 @@ import { CnnComponent } from './@application/cnn/cnn.component';
 import { BfaComponent } from './@application/bfa/bfa.component';
 import { TasksComponent } from './@application/tasks/tasks.component';
 import { EmailActionsComponent } from './@shared/email-actions/email-actions.component';
+import { GlobalTemplatesComponent } from './@shared/global-templates/global-templates.component';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true
@@ -138,7 +139,8 @@ export class AppHammerConfig extends HammerGestureConfig {
     CnnComponent,
     BfaComponent,
     TasksComponent,
-    EmailActionsComponent
+    EmailActionsComponent,
+    GlobalTemplatesComponent
   ],
   imports: [
     MessageModule,

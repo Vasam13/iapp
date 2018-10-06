@@ -41,6 +41,17 @@ export const AppStates: States = [
     }
   },
   {
+    state: 'settings.global-templates',
+    url: '/settings/global-templates',
+    roleCodes: [Roles.ADMINISTRATOR],
+    menu: {
+      label: 'Templates',
+      routerLink: '/settings/global-templates',
+      iconType: 'icon',
+      iconName: 'note'
+    }
+  },
+  {
     state: 'sales',
     url: '/sales',
     isHome: 'Y',

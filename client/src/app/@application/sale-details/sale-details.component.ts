@@ -29,6 +29,7 @@ import { QuillEditorComponent } from 'ngx-quill/src/quill-editor.component';
 import Quill from 'quill';
 import { pagesToggleService } from '../../@pages/services/toggler.service';
 import { EstimationScheduleTable } from '../tables/EstimationScheduleTable';
+import GlobalTemplatesType from '../../@shared/tables/types/GlobalTemplatesType';
 declare var pg: any;
 @Component({
   selector: 'app-sale-details',
@@ -74,7 +75,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
   }
   editorModules = {
     toolbar: [
-      [{ header: [1, 2, 3, 4, false] }],
+      // [{ header: [1, 2, 3, 4, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ list: 'ordered' }, { list: 'bullet' }]
     ]
@@ -83,6 +84,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
   startQuotaion = false;
   public saleId: number;
   showComments = false;
+  showNotes = false;
 
   salesStore: Store;
   clientStore: Store;
@@ -96,6 +98,8 @@ export class SaleDetailsComponent extends FormCanDeactivate
   statesStore: Store;
   exclusionsInclusionsStore: Store;
   salesCommentsStore: Store;
+  salesNotesStore: Store;
+  globalTemplatesStore: Store;
 
   estimations: EstimationsType[] = [];
   quotations: QuotesType[] = [];
@@ -142,7 +146,9 @@ export class SaleDetailsComponent extends FormCanDeactivate
       this.statesStore.isBusy ||
       this.citiesStore.isBusy ||
       this.exclusionsInclusionsStore.isBusy ||
-      this.salesCommentsStore.isBusy
+      this.salesCommentsStore.isBusy ||
+      this.salesNotesStore.isBusy ||
+      this.globalTemplatesStore.isBusy
     );
   }
 
@@ -330,14 +336,28 @@ export class SaleDetailsComponent extends FormCanDeactivate
     return false;
   }
 
+  visibleCurrentQuoteDiv() {
+    return this.quotationEditing;
+  }
+
   visibleCompleteQuoteBtn() {
     if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
         if (
-          (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION ||
-            this.salesRow.status === LeadStatus.QUOTED) &&
+          this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION &&
           this.quotationEditing
         ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  visibleSendForQuoteBtn() {
+    if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
+      if (this.salesRow && this.salesRow.status) {
+        if (this.salesRow.status === LeadStatus.QUOTED) {
           return true;
         }
       }
@@ -347,11 +367,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
   visibleCloseLeadeBtn() {
     if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
-        if (
-          this.salesRow.status === LeadStatus.QUOTED &&
-          this.estimations.length > 0 &&
-          !this.quotationEditing
-        ) {
+        if (this.salesRow.status === LeadStatus.QUOTATION_SENT) {
           return true;
         }
       }
@@ -372,7 +388,6 @@ export class SaleDetailsComponent extends FormCanDeactivate
   }
 
   saveAsDraft() {
-    console.log(this.salesForm.get('schedules')['controls']);
     if (this.isFormValid()) {
       const salesRow: SalesType = this.salesForm.value.projectDetails;
       salesRow.status = LeadStatus.DRAFT;
@@ -422,6 +437,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
 
   startQuotation() {
     this.quotationEditing = true;
+    this.showNotes = false;
     this.initNotesForm();
   }
 
@@ -509,34 +525,65 @@ export class SaleDetailsComponent extends FormCanDeactivate
     }
   }
 
+  isQuoteRowNull(quoteRow: QuotesType) {
+    let isNull = true;
+    Object.keys(quoteRow).forEach(key => {
+      if (quoteRow[key] != null) {
+        isNull = false;
+      }
+    });
+    return isNull;
+  }
+
   saveQuotation(complete: boolean) {
     if (this.isFormValid()) {
       const salesRow: SalesType = this.salesForm.value.projectDetails;
       if (complete) {
+        salesRow.status = LeadStatus.QUOTATION_SENT;
+      } else {
         salesRow.status = LeadStatus.QUOTED;
       }
       salesRow.$operation$ = QueryOperation.UPDATE;
-      const quoteRow: QuotesType = this.salesForm.value.quotation;
-      quoteRow.$operation$ = QueryOperation.INSERT;
-      quoteRow.versionNumber = this.quotations.length;
-      quoteRow.salesId = salesRow.salesId;
-      quoteRow.estimateId = this.estimations[this.estimations.length - 1].id;
+      let quoteRow: QuotesType = this.salesForm.value.quotation;
+      if (!this.isQuoteRowNull(quoteRow)) {
+        quoteRow.$operation$ = QueryOperation.INSERT;
+        quoteRow.versionNumber = this.quotations.length;
+        quoteRow.salesId = salesRow.salesId;
+        quoteRow.estimateId = this.estimations[this.estimations.length - 1].id;
+      } else {
+        quoteRow = null;
+      }
+      console.log(quoteRow);
       salesRow.bidType = this.arrayToString(salesRow.bidType);
       salesRow.$actionParams$ = {
         generateQuotePDF: 'Y'
       };
       this.salesStore.saveRows([<Row>salesRow]).then(() => {
-        this.quotesStore.saveRows([<Row>quoteRow]).then(_res => {
-          if (_res.rows && _res.rows.length > 0) {
-            if (_res.rows[0].$status$ === Status.SUCCESS) {
-              // Utils.notifyInfo(
-              //   this.message,
-              //   'Success',
-              //   'Quotation sent for approval!'
-              // );
-              this.form.form.reset();
-              this.gotoSales();
+        const notes = [];
+        const formGoups = this.salesForm.get('notes')['controls'];
+        if (formGoups.length > 0) {
+          formGoups.forEach(formGoup => {
+            const row = formGoup.value;
+            row.salesId = this.salesRow.salesId;
+            if (row.$operation$ === QueryOperation.QUERY) {
+              row.$operation$ = QueryOperation.UPDATE;
             }
+            notes.push(row);
+          });
+        }
+        this.salesNotesStore.saveRows(notes).then(() => {
+          if (quoteRow != null) {
+            this.quotesStore.saveRows([<Row>quoteRow]).then(_res => {
+              if (_res.rows && _res.rows.length > 0) {
+                if (_res.rows[0].$status$ === Status.SUCCESS) {
+                  this.form.form.reset();
+                  this.gotoSales();
+                }
+              }
+            });
+          } else {
+            this.form.form.reset();
+            this.gotoSales();
           }
         });
       });
@@ -592,6 +639,8 @@ export class SaleDetailsComponent extends FormCanDeactivate
     this.estimationLeadsStore.destroy();
     this.estimatorsStore.destroy();
     this.salesCommentsStore.destroy();
+    this.salesNotesStore.destroy();
+    this.globalTemplatesStore.destroy();
   }
 
   groupByComments(comments: Row[]) {
@@ -639,6 +688,25 @@ export class SaleDetailsComponent extends FormCanDeactivate
       {
         whereClause: 'sales_id = ?',
         skipNotifications: true
+      }
+    );
+    this.salesNotesStore = this.storeService.getInstance(
+      'SalesNotes',
+      'salesnotes',
+      [],
+      {
+        whereClause: 'sales_id = ?',
+        orderByClause: 'position asc'
+      }
+    );
+    this.globalTemplatesStore = this.storeService.getInstance(
+      'GlobalTemplates',
+      'globaltemplates',
+      [],
+      {
+        whereClause: 'template_code like ?',
+        whereClauseParams: ['pdf_%'],
+        orderByClause: 'create_date asc'
       }
     );
     this.salesCommentsStore.afterQuery = (rows: Row[]) => {
@@ -785,6 +853,9 @@ export class SaleDetailsComponent extends FormCanDeactivate
         this.clientStore.whereClauseParams = [this.salesRow.clientId];
         this.estimationStore.whereClauseParams = [this.salesRow.salesId];
         this.quotesStore.whereClauseParams = [this.salesRow.salesId];
+        if (this.salesRow.status === LeadStatus.QUOTED) {
+          this.initNotesForm();
+        }
         if (this.salesRow.projectCountry) {
           const country = this.filterCountry(this.salesRow.projectCountry);
           if (country) {
@@ -1109,12 +1180,74 @@ export class SaleDetailsComponent extends FormCanDeactivate
     }
   }
 
+  createNotesFromTemplates(templates: GlobalTemplatesType[]) {
+    templates.forEach((template, index) => {
+      const formGroup = new FormGroup(this.formFromObject('Notes'));
+      formGroup.controls['$operation$'].setValue(QueryOperation.INSERT);
+      formGroup.controls['title'].setValue(template.title);
+      formGroup.controls['content'].setValue(template.content);
+      formGroup.controls['position'].setValue(index);
+      formGroup.controls['code'].setValue(template.templateCode);
+      (<FormArray>this.salesForm.get('notes')).push(formGroup);
+    });
+  }
+  createNotesForm(notes: Row[]) {
+    notes.forEach((note, index) => {
+      const formGroup = new FormGroup(this.formFromObject('Notes'));
+      formGroup.controls['$operation$'].setValue(QueryOperation.UPDATE);
+      Object.keys(note).forEach(key => {
+        if (formGroup.value.hasOwnProperty(key)) {
+          formGroup.controls[key].setValue(note[key]);
+        }
+      });
+      (<FormArray>this.salesForm.get('notes')).push(formGroup);
+    });
+  }
+  saveNotes() {
+    const notes = [];
+    const formGoups = this.salesForm.get('notes')['controls'];
+    if (formGoups.length > 0) {
+      formGoups.forEach(formGoup => {
+        const row = formGoup.value;
+        row.salesId = this.salesRow.salesId;
+        if (row.$operation$ === QueryOperation.QUERY) {
+          row.$operation$ = QueryOperation.UPDATE;
+        }
+        notes.push(row);
+      });
+    }
+    this.salesNotesStore.saveRows(notes);
+  }
   initNotesForm() {
-    const formGroup = new FormGroup(this.formFromObject('Notes'));
-    formGroup.controls['$operation$'].setValue(QueryOperation.INSERT);
-    formGroup.controls['title'].setValue('Requirements from client');
-    formGroup.controls['content'].setValue('Test this one');
-    (<FormArray>this.salesForm.get('notes')).push(formGroup);
+    if (this.salesNotesStore.rows.length > 0) {
+      return;
+    }
+    this.salesNotesStore.whereClauseParams = [this.salesRow.salesId];
+    this.salesNotesStore.query().then(res => {
+      if (res.rows && res.rows.length > 0) {
+        this.createNotesForm(res.rows);
+      } else {
+        this.globalTemplatesStore.query().then(_res => {
+          if (_res.rows && _res.rows.length > 0) {
+            this.createNotesFromTemplates(_res.rows);
+          }
+        });
+      }
+    });
+  }
+
+  visibleShowNotesBtn() {
+    if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
+      if (this.salesRow && this.salesRow.status) {
+        if (
+          this.quotationEditing ||
+          this.salesRow.status === LeadStatus.QUOTED
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   initScheduleForm() {

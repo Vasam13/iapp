@@ -1,3 +1,4 @@
+import globaltemplates from './hooks/globaltemplates';
 import estimationschedule from './hooks/estimationschedule';
 import users from './hooks/users';
 import sales from './hooks/sales';
@@ -6,5 +7,6 @@ export const Store: any = {
   sales,
   users,
   salescomments,
-  estimationschedule
+  estimationschedule,
+  globaltemplates
 }

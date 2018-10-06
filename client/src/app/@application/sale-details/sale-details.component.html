@@ -1239,7 +1239,7 @@
 
 
                 <!-- Current Quote-->
-                <div *ngIf="visibleCompleteQuoteBtn()">
+                <div *ngIf="visibleCurrentQuoteDiv()">
                   <p class="m-t-30">
                     <em class="icon-calculator  m-l-5"></em>&nbsp;&nbsp;Quotation
                   </p>
@@ -1261,6 +1261,7 @@
                             placeholder="Enter price"
                             formControlName="mainSteelPrice"
                             class="autonumeric form-control"
+                            required
                           >
                         </div>
                       </div>
@@ -1276,6 +1277,7 @@
                             placeholder="Enter price"
                             formControlName="miscSteelPrice"
                             class="autonumeric form-control"
+                            required
                           >
                         </div>
                       </div>
@@ -1291,6 +1293,7 @@
                             placeholder="Enter price"
                             class="form-control"
                             formControlName="engineeringPrice"
+                            required
                           >
                         </div>
                       </div>
@@ -1300,7 +1303,7 @@
                       <div class="col-md-12">
                         <div
                           pgFormGroupDefault
-                          class="form-group form-group-default required"
+                          class="form-group form-group-default"
                         >
                           <label>Remarks</label>
                           <textarea
@@ -1316,32 +1319,32 @@
                 <!-- End of Current Quote-->
 
                 <div
-                  class="row clearfix"
-                  *ngIf="visibleCompleteQuoteBtn()"
+                  class="row"
+                  *ngIf="showNotes"
+                  formArrayName="notes"
                 >
                   <div
-                    class="form-group-attached"
-                    formArrayName="notes"
+                    style="width:100%"
+                    *ngFor="let formgroup of salesForm.get('notes')['controls']; let _index = index"
                   >
-                    <div *ngFor="let formgroup of salesForm.get('notes')['controls']; let _index = index">
-                      <div [formGroupName]="_index">
-                        <p class="m-t-30">
-                          <em class="icon-note  m-l-5"></em>&nbsp;&nbsp;{{formgroup.value.title}}
-                        </p>
-                        <div class="wysiwyg5-wrapper b-a b-grey wysiwug">
-                          <quill-editor
-                            [style]="{height: '200px'}"
-                            placeholder="Enter Requirements"
-                            [modules]="editorModules"
-                            name="content"
-                            formControlName="content"
-                          >
-                          </quill-editor>
-                        </div>
+                    <div [formGroupName]="_index">
+                      <p class="m-t-30">
+                        <em class="icon-note  m-l-5"></em>&nbsp;&nbsp;{{formgroup.value.title}}
+                      </p>
+                      <div class="wysiwyg5-wrapper b-a b-grey wysiwug">
+                        <quill-editor
+                          [style]="{height: '200px'}"
+                          placeholder="Enter Requirements"
+                          [modules]="editorModules"
+                          name="content"
+                          formControlName="content"
+                        >
+                        </quill-editor>
                       </div>
                     </div>
                   </div>
                 </div>
+
 
                 <!-- Submit buttons-->
                 <div class="row clearfix m-t-20">
@@ -1395,20 +1398,32 @@
                       [disabled]="isPageBusy()"
                     ><em class="icon-refresh"></em>&nbsp;Send For Re-Estimatation</button>
                     <button
+                      *ngIf="quotationEditing"
+                      (click)="saveQuotation()"
+                      class="btn btn-rounded btn-primary m-r-10"
+                      [disabled]="isPageBusy()"
+                    ><em class="icon-folder"></em>&nbsp;Save Quote</button>
+                    <button
                       *ngIf="visibleStartQuoteBtn()"
                       (click)="startQuotation()"
                       class="btn btn-rounded btn-primary m-r-10"
                       [disabled]="isPageBusy()"
-                    ><em class="icon-arrow-right"></em>&nbsp;Start Quotation</button>
-
+                    ><em class="icon-arrow-right"></em>&nbsp;
+                      {{salesRow.status === 'Quoted' ? 'Re Quote' : 'Start Quotation'}}</button>
                     <button
-                      *ngIf="visibleCompleteQuoteBtn()"
-                      (click)="saveQuotation()"
+                      *ngIf="visibleShowNotesBtn()"
+                      (click)="showNotes = !showNotes"
                       class="btn btn-rounded btn-primary m-r-10"
                       [disabled]="isPageBusy()"
-                    ><em class="icon-folder"></em>&nbsp;Save Quotation</button>
+                    ><em class="icon-note"></em>&nbsp;{{(showNotes) ? 'Hide':'Show'}} Additional Notes</button>
                     <button
-                      *ngIf="visibleCompleteQuoteBtn()"
+                      *ngIf="showNotes"
+                      (click)="saveNotes()"
+                      class="btn btn-rounded btn-primary m-r-10"
+                      [disabled]="isPageBusy()"
+                    ><em class="icon-folder"></em>&nbsp;Save Notes</button>
+                    <button
+                      *ngIf="visibleSendForQuoteBtn()"
                       (click)="completeQuotation()"
                       class="btn btn-rounded btn-primary m-r-10"
                       [disabled]="isPageBusy()"

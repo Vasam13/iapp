@@ -284,3 +284,12 @@ input[type='date']::-webkit-clear-button {
   width: 100%;
   background: #fff;
 }
+
+.ql-editor {
+  color: #000;
+  font-size: 14px;
+}
+.ql-editor p {
+  font-size: 14px;
+  color: #000;
+}

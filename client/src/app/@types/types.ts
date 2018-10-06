@@ -106,6 +106,7 @@ export interface ColumnMetaData<T> {
   visible?: Function;
   linkConfiguration?: LinkConfiguration;
   templateConfiguration?: TemplateConfiguration;
+  maxWidth?: number;
   $touched$?: boolean;
 }
 export interface StoreOption {
@@ -294,6 +295,7 @@ export enum LeadStatus {
   ESTIMATED = 'Estimated',
   REQUEST_FOR_QUOTATION = 'For Quotation',
   QUOTED = 'Quoted',
+  QUOTATION_SENT = 'Quotation Sent',
   CLOSED_WIN = 'Closed, Win',
   CLOSED_LOSE = 'Closed, Lose'
 }

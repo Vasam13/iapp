@@ -33,7 +33,7 @@ export class DataUtils {
     } else if (type === 'ProjectsType') {
       return DataUtils.getProjectsType();
     } else if (type === 'Notes') {
-      return DataUtils.getProjectsType();
+      return DataUtils.getNotesType();
     }
     return [];
   }
@@ -42,8 +42,10 @@ export class DataUtils {
     return [
       'id',
       'salesId',
+      'code',
       'title',
-      'notes',
+      'content',
+      'position',
       'createDate',
       'createUserId',
       'updateDate',

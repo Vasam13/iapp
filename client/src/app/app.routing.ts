@@ -25,6 +25,7 @@ import { CnnComponent } from './@application/cnn/cnn.component';
 import { BfaComponent } from './@application/bfa/bfa.component';
 import { TasksComponent } from './@application/tasks/tasks.component';
 import { EmailActionsComponent } from './@shared/email-actions/email-actions.component';
+import { GlobalTemplatesComponent } from './@shared/global-templates/global-templates.component';
 
 export const AppRoutes: Routes = [
   {
@@ -94,6 +95,17 @@ export const AppRoutes: Routes = [
         path: 'email-actions',
         component: EmailActionsComponent,
         data: { state: 'settings.email-actions' }
+      }
+    ]
+  },
+  {
+    path: 'settings',
+    component: CondensedComponent,
+    children: [
+      {
+        path: 'global-templates',
+        component: GlobalTemplatesComponent,
+        data: { state: 'settings.global-templates' }
       }
     ]
   },
