@@ -49,7 +49,14 @@ export default class APIManager {
     }
     let sql = queryRequest.customSql;
     if (!sql) {
-      sql = Utils.parseQueryParams(queryRequest);
+      try {
+        sql = await Utils.parseQueryParams(queryRequest);
+      } catch (err) {
+        error = err;
+      }
+    }
+    if (error || !sql) {
+      return this.resolveError(CODE.ERR_BEFORE_QUERY, error, response);
     }
     response.sql = sql;
     logger.log(LogType.INFO, sql);
@@ -72,14 +79,11 @@ export default class APIManager {
       instance.rows = rows;
       instance.toatalRows = rows.length;
     }
-    await response.rows.forEach(async (row, index) => {
-      if (instance && typeof instance.afterQuery === 'function') {
-        instance.rowIndex = index;
-        await instance.afterQuery(row).catch(err => {
-          error = err;
-        });
-      }
-    });
+    if (instance && typeof instance.afterQuery === 'function') {
+      await instance.afterQuery(response.rows).catch(err => {
+        error = err;
+      });
+    }
     if (error) {
       return this.resolveError(CODE.ERR_AFTER_QUERY, error, response);
     }
@@ -142,8 +146,8 @@ export default class APIManager {
         const emailAction: Row = res;
         const condition = emailAction.condition;
         if (condition) {
+          var jexl = require('jexl');
           try {
-            var jexl = require('Jexl');
             jexl.eval(condition, row, function(err: any, res: any) {
               if (err) {
                 logger.log(LogType.ERROR, 'Exception while email action', res);

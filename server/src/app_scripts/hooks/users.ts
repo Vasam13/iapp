@@ -35,12 +35,10 @@ export default class users extends Table {
     return Promise.resolve();
   }
 
-  public async afterQuery(_row: Row) {
-    const row: Users = <Users>_row;
-    // Write your code below
-
-    //Don't change below line
-    return Promise.resolve();
+  public async afterQuery(_rows: Row[]): Promise<any> {
+    return new Promise((resolve, reject) => {
+      resolve();
+    });
   }
 
   public async beforeInsert(_row: Row): Promise<any> {
@@ -55,24 +53,32 @@ export default class users extends Table {
     });
   }
 
+  private sendPasswordGenMail(_row: Row, re?: boolean) {
+    const row: Users = <Users>_row;
+    if (row.emailAddress && this.password) {
+      _row.password = this.password;
+      let subject = 'Your login password is generated';
+      if (re) {
+        subject = 'Reset password';
+      }
+      Utils.sendEmail(
+        [row.emailAddress],
+        [],
+        subject,
+        'Hi ' +
+          row.displayName +
+          ',<br/> your password is generated as <b>' +
+          this.password +
+          '</b><br/>' +
+          'Login into your account, and reset the password<br/><br/><br/>' +
+          '<i>this is an automatically generated email – please do not reply to it.</i>'
+      );
+    }
+  }
+
   public async afterInsert(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Users = <Users>_row;
-      _row.password = this.password;
-      if (row.emailAddress) {
-        Utils.sendEmail(
-          [row.emailAddress],
-          [],
-          'Your login password is generated',
-          'Hi ' +
-            row.displayName +
-            ', your password is generated as <b>' +
-            this.password +
-            '</b><br/>' +
-            'Login into your account, and reset the password<br/><br/><br/>' +
-            '<i>this is an automatically generated email – please do not reply to it.</i>'
-        );
-      }
+      this.sendPasswordGenMail(_row);
       return resolve();
     });
   }
@@ -80,7 +86,14 @@ export default class users extends Table {
   public async beforeUpdate(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
       const row: Users = <Users>_row;
-      if (row.oldPassword && row.passwordHash && row.newPassword) {
+      if (_row.$actionParams$ && _row.$actionParams$.resetPassword === 'Y') {
+        this.password = Utils.generatePassword();
+        Utils.encrypt(this.password, 10, (hash: string) => {
+          row.passwordHash = hash;
+          row.passwordChanged = 'N';
+          return resolve();
+        });
+      } else if (row.oldPassword && row.passwordHash && row.newPassword) {
         bcrypt.compare(row.oldPassword, row.passwordHash).then(function(res) {
           if (res && row.newPassword) {
             Utils.encrypt(row.newPassword, 10, (hash: string) => {
@@ -102,10 +115,9 @@ export default class users extends Table {
 
   public async afterUpdate(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Users = <Users>_row;
-      // Write your code below
-
-      //Don't change below line
+      if (_row.$actionParams$ && _row.$actionParams$.resetPassword === 'Y') {
+        this.sendPasswordGenMail(_row, true);
+      }
       return resolve();
     });
   }

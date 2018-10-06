@@ -76,10 +76,21 @@
           [ngClass]="{ 'current-row': store.isCurrentRow(rowIndex), 'first-column': columnIndex===0,
         'grid-cell-has-errors' : store.hasErrors(row, md)}"
           (blur)="store.resetCurrentColumn()"
-          [type]="md.type"
+          [type]="getInputType(md)"
           [value]="row[md.column]"
           [(ngModel)]="row[md.column]"
         />
+        <div
+          style="padding-left: 10px"
+          class="checkbox check-primary"
+          *ngIf="isCheckboxColumn(md)"
+        ><input
+            [id]="rowIndex +'_'+columnIndex"
+            type="checkbox"
+            [(ngModel)]="row[md.column]"
+            [checked]="getCheckboxValue(row, md)"
+            (change)="onCheckboxChanged(row, md)"
+          ><label [for]="rowIndex +'_'+columnIndex"></label></div>
         <!-- <div class="input-group date col-md-8 p-l-0"> -->
         <!-- <pg-datepicker
           *ngIf="md.type === 'date'"
@@ -96,24 +107,25 @@
                 </span>
             </div>
           </div> -->
-        <select
+        <pg-select
           *ngIf="isSelectColumn(md) && store.isEditable(row, md)"
           (onchange)="store.clickHandler(row, md)"
           (click)="store.setCurrentColumn(rowIndex, columnIndex)"
           class="gird-cell-editor"
           [ngClass]="{ 'current-row': store.isCurrentRow(rowIndex), 'first-column': columnIndex===0}"
           (blur)="store.resetCurrentColumn()"
+          [PlaceHolder]="'Select Option'"
           [(ngModel)]="row[md.column]"
           AllowClear
           ShowSearch
         >
-          <option
+          <pg-option
             *ngFor="let dropdownRows of md.dropDownConfiguration.store.rows"
-            [label]="dropdownRows[md.dropDownConfiguration.displayColumn]"
-            [value]="dropdownRows[md.dropDownConfiguration.valueColumn]"
+            [Label]="dropdownRows[md.dropDownConfiguration.displayColumn]"
+            [Value]="dropdownRows[md.dropDownConfiguration.valueColumn]"
           >
-          </option>
-        </select>
+          </pg-option>
+        </pg-select>
         <!-- <div
           *ngIf="isSelectColumn(md) && !store.isEditable(row, md)"
           class="gird-cell-editor"

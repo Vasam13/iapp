@@ -72,22 +72,25 @@ export class SalesComponent implements OnInit, OnDestroy {
     }
 
     if (Utils.hasAnyRole([Roles.ESTIMATOR])) {
-      this.salesStore.whereClause = 'estimator = ? and status IN (?, ?, ?)';
+      this.salesStore.whereClause = 'estimator = ? and status IN (?, ?, ?, ?)';
       this.salesStore.whereClauseParams = [
         Utils.getUserId(),
         LeadStatus.ESTIMATED,
         LeadStatus.REQUEST_FOR_ESTIMATION,
-        LeadStatus.REQUEST_FOR_QUOTATION
+        LeadStatus.REQUEST_FOR_QUOTATION,
+        LeadStatus.REQUEST_FOR_RE_ESTIMATION
       ];
     }
 
     if (Utils.hasAnyRole([Roles.ESTIMATION_MANAGER])) {
-      this.salesStore.whereClause = 'estimate_Lead = ? and status IN (?, ?)';
+      this.salesStore.whereClause =
+        'estimate_Lead = ? and status IN (?, ?, ?, ?)';
       this.salesStore.whereClauseParams = [
         Utils.getUserId(),
         LeadStatus.ESTIMATED,
         LeadStatus.REQUEST_FOR_ESTIMATION,
-        LeadStatus.REQUEST_FOR_QUOTATION
+        LeadStatus.REQUEST_FOR_QUOTATION,
+        LeadStatus.REQUEST_FOR_RE_ESTIMATION
       ];
     }
 
@@ -136,7 +139,7 @@ export class SalesComponent implements OnInit, OnDestroy {
         badge = 'success';
       }
       if (row.status === LeadStatus.QUOTED) {
-        badge = 'completed';
+        badge = 'success';
       }
       if (row.status === LeadStatus.CLOSED_LOSE) {
         badge = 'important';
@@ -148,7 +151,8 @@ export class SalesComponent implements OnInit, OnDestroy {
     if (Utils.hasAnyRole([Roles.ESTIMATOR, Roles.ESTIMATION_MANAGER])) {
       if (
         row.status === LeadStatus.ESTIMATED ||
-        row.status === LeadStatus.REQUEST_FOR_ESTIMATION
+        row.status === LeadStatus.REQUEST_FOR_ESTIMATION ||
+        row.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION
       ) {
         badge = 'warning';
       }

@@ -1,42 +1,93 @@
-import { Row, QueryOperation, Roles, Functions, LeadStatus } from '@types';
+import { Row, Roles, Functions, LeadStatus, ColumnType } from '@types';
 import { MessageService } from '@message';
 import { Utils } from '@utils';
-import { Store, Status } from '@types';
+import { Store, Status, QueryOperation } from '@types';
 import { StoreService } from '@StoreService';
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, FormControl, FormArray } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormControl,
+  FormArray,
+  NgForm
+} from '@angular/forms';
 import ClientsType from './../tables/types/ClientsType';
 import SalesType from './../tables/types/SalesType';
 import EstimationsType from './../tables/types/EstimationsType';
+import EstimationScheduleType from './../tables/types/EstimationScheduleType';
 import QuotesType from './../tables/types/QuotesType';
 import { DataUtils } from '../data';
 import { ModalDirective } from 'ngx-bootstrap/modal';
-
+import { FormCanDeactivate } from './../../@core/components/form/form-can-deactivate';
+import {
+  PerfectScrollbarConfigInterface,
+  PerfectScrollbarComponent,
+  PerfectScrollbarDirective
+} from 'ngx-perfect-scrollbar';
+import { QuillEditorComponent } from 'ngx-quill/src/quill-editor.component';
+import Quill from 'quill';
+import { pagesToggleService } from '../../@pages/services/toggler.service';
+import { EstimationScheduleTable } from '../tables/EstimationScheduleTable';
+declare var pg: any;
 @Component({
   selector: 'app-sale-details',
   templateUrl: './sale-details.component.html',
   styleUrls: ['./sale-details.component.scss']
 })
-export class SaleDetailsComponent implements OnInit, OnDestroy {
+export class SaleDetailsComponent extends FormCanDeactivate
+  implements OnInit, OnDestroy {
   @ViewChild('closeLeadModal')
   closeLeadModal: ModalDirective;
+
+  @ViewChild('newBidDetailPopup')
+  newBidDetailPopup: ModalDirective;
+
+  @ViewChild('addNewCityModal')
+  addNewCityModal: ModalDirective;
+  newCityEntered: string;
+  newRequirement: string;
+  citiesStore: Store;
+
+  @ViewChild('form')
+  form: NgForm;
+
+  isMobile = pg.getUserAgent() === 'mobile';
+  public config: PerfectScrollbarConfigInterface = {};
+  selectedConv: any;
+  timeout;
+  isConSelected: boolean;
+
+  conversations = [];
+  currentComment: string;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private storeService: StoreService,
     private message: MessageService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private toggler: pagesToggleService
   ) {
+    super();
     this.route.params.subscribe(params => (this.saleId = params.id));
   }
+  editorModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, 4, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }]
+    ]
+  };
   startEstimate = false;
   startQuotaion = false;
   public saleId: number;
+  showComments = false;
 
   salesStore: Store;
   clientStore: Store;
   estimationStore: Store;
+  estimationScheduleStore: Store;
   quotesStore: Store;
   salesPersonStore: Store;
   estimationLeadsStore: Store;
@@ -44,6 +95,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   countryStore: Store;
   statesStore: Store;
   exclusionsInclusionsStore: Store;
+  salesCommentsStore: Store;
 
   estimations: EstimationsType[] = [];
   quotations: QuotesType[] = [];
@@ -55,6 +107,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   clientRow: ClientsType;
   estimationsRow: EstimationsType;
   leadFinalStatus: string;
+  currentEstimationId: number;
 
   requirements = ['Structural', 'Engineering', 'Miscellaneous'];
 
@@ -66,18 +119,30 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   estimationEditing = false;
   quotationEditing = false;
 
+  onSelect(item: any): void {
+    this.selectedConv = item;
+    this.isConSelected = true;
+  }
+
+  getUserPicUrl(userId: number) {
+    return Utils.getDPUrl(userId);
+  }
+
   isPageBusy() {
     return (
       this.salesStore.isBusy ||
       this.clientStore.isBusy ||
       this.estimationStore.isBusy ||
+      this.estimationScheduleStore.isBusy ||
       this.quotesStore.isBusy ||
       this.salesPersonStore.isBusy ||
       this.estimationLeadsStore.isBusy ||
       this.estimatorsStore.isBusy ||
       this.countryStore.isBusy ||
       this.statesStore.isBusy ||
-      this.exclusionsInclusionsStore.isBusy
+      this.citiesStore.isBusy ||
+      this.exclusionsInclusionsStore.isBusy ||
+      this.salesCommentsStore.isBusy
     );
   }
 
@@ -150,7 +215,14 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   }
 
   visibleOldEstimations() {
-    if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
+    if (
+      Utils.hasAnyRole([
+        Roles.SALES_PERSON,
+        Roles.SALES_MANAGER,
+        Roles.ESTIMATION_MANAGER,
+        Roles.ESTIMATOR
+      ])
+    ) {
       if (this.salesRow && this.salesRow.status) {
         if (
           (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION ||
@@ -177,11 +249,27 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
       }
     }
   }
+  visibleEstimationDiv() {
+    if (Utils.hasAnyRole([Roles.ESTIMATOR, Roles.ESTIMATION_MANAGER])) {
+      if (this.salesRow && this.salesRow.status) {
+        if (
+          (this.salesRow.status === LeadStatus.REQUEST_FOR_ESTIMATION ||
+            this.salesRow.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION ||
+            this.salesRow.status === LeadStatus.ESTIMATED) &&
+          this.estimationEditing
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
   visibleSaveEstimationBtn() {
     if (Utils.hasAnyRole([Roles.ESTIMATOR, Roles.ESTIMATION_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
         if (
           (this.salesRow.status === LeadStatus.REQUEST_FOR_ESTIMATION ||
+            this.salesRow.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION ||
             this.salesRow.status === LeadStatus.ESTIMATED) &&
           this.estimationEditing
         ) {
@@ -197,6 +285,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
       if (this.salesRow && this.salesRow.status) {
         if (
           (this.salesRow.status === LeadStatus.REQUEST_FOR_ESTIMATION ||
+            this.salesRow.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION ||
             this.salesRow.status === LeadStatus.ESTIMATED) &&
           !this.estimationEditing
         ) {
@@ -214,7 +303,11 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   visibleSendReEstimationBtn() {
     if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
-        if (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION) {
+        if (
+          this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION &&
+          this.quotations.length === 0 &&
+          !this.quotationEditing
+        ) {
           return true;
         }
       }
@@ -271,13 +364,15 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
     salesRow.bidType = this.arrayToString(salesRow.bidType);
     this.salesStore.saveRows([<Row>salesRow]).then(_res => {
       if (_res.rows[0].$status$ === Status.SUCCESS) {
-        Utils.notifyInfo(this.message, 'Success', 'Lead saved!');
+        // Utils.notifyInfo(this.message, 'Success', 'Lead saved!');
+        this.form.form.reset();
         this.gotoSales();
       }
     });
   }
 
   saveAsDraft() {
+    console.log(this.salesForm.get('schedules')['controls']);
     if (this.isFormValid()) {
       const salesRow: SalesType = this.salesForm.value.projectDetails;
       salesRow.status = LeadStatus.DRAFT;
@@ -327,6 +422,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
 
   startQuotation() {
     this.quotationEditing = true;
+    this.initNotesForm();
   }
 
   assignEstimaor() {
@@ -344,10 +440,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
     estimateRow.$operation$ = QueryOperation.UPDATE;
     if (!estimateRow.id) {
       estimateRow.$operation$ = QueryOperation.INSERT;
-    }
-    estimateRow.versionNumber = this.estimations.length;
-    if (estimateRow.versionNumber === 0) {
-      estimateRow.versionNumber = 1;
+      estimateRow.versionNumber = this.estimations.length + 1;
     }
     estimateRow.salesId = salesRow.salesId;
     estimateRow.mainSteelInclusions = this.arrayToString(
@@ -368,8 +461,30 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
       this.estimationStore.saveRows([<Row>estimateRow]).then(_res => {
         if (_res.rows && _res.rows.length > 0) {
           if (_res.rows[0].$status$ === Status.SUCCESS) {
-            Utils.notifyInfo(this.message, 'Success', 'Estimation saved!');
-            this.gotoSales();
+            const scheduleRows = [];
+            const formGoups = this.salesForm.get('schedules')['controls'];
+            if (formGoups.length > 0) {
+              formGoups.forEach(formGoup => {
+                const row = formGoup.value;
+                row.estimationId = _res.rows[0].id;
+                scheduleRows.push(row);
+              });
+            }
+            if (scheduleRows.length > 0) {
+              this.estimationScheduleStore
+                .saveRows(scheduleRows)
+                .then(__res => {
+                  if (__res.rows && __res.rows.length > 0) {
+                    if (__res.rows[0].$status$ === Status.SUCCESS) {
+                      this.form.form.reset();
+                      this.gotoSales();
+                    }
+                  }
+                });
+            } else {
+              this.form.form.reset();
+              this.gotoSales();
+            }
           }
         }
       });
@@ -394,49 +509,6 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  estimationAction(completeEstimation: boolean) {
-    if (this.isFormValid()) {
-      const salesRow: SalesType = this.salesForm.value.projectDetails;
-      salesRow.status = LeadStatus.ESTIMATED;
-      if (completeEstimation) {
-        salesRow.status = LeadStatus.REQUEST_FOR_QUOTATION;
-      }
-      const estimateRow: EstimationsType = this.salesForm.value.estimations;
-      estimateRow.$operation$ = QueryOperation.UPDATE;
-      if (!estimateRow.id) {
-        estimateRow.$operation$ = QueryOperation.INSERT;
-      }
-      estimateRow.versionNumber = this.estimations.length;
-      if (estimateRow.versionNumber === 0) {
-        estimateRow.versionNumber = 1;
-      }
-      estimateRow.salesId = salesRow.salesId;
-      estimateRow.mainSteelInclusions = this.arrayToString(
-        estimateRow.mainSteelInclusions
-      );
-      estimateRow.mainSteelExclusions = this.arrayToString(
-        estimateRow.mainSteelExclusions
-      );
-      estimateRow.miscSteelInclusions = this.arrayToString(
-        estimateRow.miscSteelInclusions
-      );
-      estimateRow.miscSteelExclusions = this.arrayToString(
-        estimateRow.miscSteelExclusions
-      );
-      salesRow.bidType = this.arrayToString(salesRow.bidType);
-      this.salesStore.saveRows([<Row>salesRow]).then(() => {
-        this.estimationStore.saveRows([<Row>estimateRow]).then(_res => {
-          if (_res.rows && _res.rows.length > 0) {
-            if (_res.rows[0].$status$ === Status.SUCCESS) {
-              Utils.notifyInfo(this.message, 'Success', 'Estimation saved!');
-              this.gotoSales();
-            }
-          }
-        });
-      });
-    }
-  }
-
   saveQuotation(complete: boolean) {
     if (this.isFormValid()) {
       const salesRow: SalesType = this.salesForm.value.projectDetails;
@@ -457,11 +529,12 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
         this.quotesStore.saveRows([<Row>quoteRow]).then(_res => {
           if (_res.rows && _res.rows.length > 0) {
             if (_res.rows[0].$status$ === Status.SUCCESS) {
-              Utils.notifyInfo(
-                this.message,
-                'Success',
-                'Quotation sent for approval!'
-              );
+              // Utils.notifyInfo(
+              //   this.message,
+              //   'Success',
+              //   'Quotation sent for approval!'
+              // );
+              this.form.form.reset();
               this.gotoSales();
             }
           }
@@ -489,6 +562,7 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
                 'Success',
                 'Lead closed successfully!'
               );
+              this.form.form.reset();
               this.gotoSales();
             }
           }
@@ -504,25 +578,97 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    clearTimeout(this.timeout);
     this.salesStore.destroy();
     this.countryStore.destroy();
     this.statesStore.destroy();
+    this.citiesStore.destroy();
     this.exclusionsInclusionsStore.destroy();
     this.clientStore.destroy();
     this.estimationStore.destroy();
+    this.estimationScheduleStore.destroy();
     this.quotesStore.destroy();
     this.salesPersonStore.destroy();
     this.estimationLeadsStore.destroy();
     this.estimatorsStore.destroy();
+    this.salesCommentsStore.destroy();
+  }
+
+  groupByComments(comments: Row[]) {
+    const groupped = {}; // key --> April 23, value - List of rows
+    comments.forEach(comment => {
+      const group = comment.group;
+      if (group) {
+        if (!groupped[group]) {
+          groupped[group] = [];
+        }
+        groupped[group].push(comment);
+      }
+    });
+    const _conversations = [];
+    Object.keys(groupped).forEach(group => {
+      _conversations.push({
+        group,
+        list: groupped[group]
+      });
+    });
+    return _conversations;
+  }
+
+  sendComment() {
+    if (this.currentComment) {
+      const row: Row = {
+        $operation$: QueryOperation.INSERT,
+        comment: this.currentComment,
+        salesId: this.salesRow.salesId
+      };
+      this.salesCommentsStore.saveRows([row]).then(() => {
+        this.currentComment = null;
+      });
+    }
   }
 
   ngOnInit() {
-    const selectParams = DataUtils.getTypeParams('SalesType');
-    this.salesStore = this.storeService.getInstance('Sales', 'sales', [], {
-      whereClause: 'sales_id = ?',
-      whereClauseParams: [this.saleId],
-      selectParams
+    this.timeout = setTimeout(() => {
+      this.toggler.toggleFooter(false);
     });
+    this.salesCommentsStore = this.storeService.getInstance(
+      'SalesComments',
+      'salescomments',
+      [],
+      {
+        whereClause: 'sales_id = ?',
+        skipNotifications: true
+      }
+    );
+    this.salesCommentsStore.afterQuery = (rows: Row[]) => {
+      this.conversations = this.groupByComments(rows);
+    };
+
+    this.toggler.setPageContainer('full-height');
+    this.toggler.setContent('full-height');
+    const selectParams = DataUtils.getTypeParams('SalesType');
+    this.salesStore = this.storeService.getInstance(
+      'Sales',
+      'sales',
+      [
+        {
+          column: 'bidReceivedDate',
+          title: 'bidReceivedDate',
+          type: ColumnType.DATE
+        },
+        {
+          column: 'bidDueDate',
+          title: 'bidDueDate',
+          type: ColumnType.DATE
+        }
+      ],
+      {
+        whereClause: 'sales_id = ?',
+        whereClauseParams: [this.saleId],
+        selectParams
+      }
+    );
     this.countryStore = this.storeService.getInstance(
       'Countries',
       'countries',
@@ -533,7 +679,19 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
     this.statesStore = this.storeService.getInstance('States', 'states', [], {
       skipOrderBy: true
     });
+    this.citiesStore = this.storeService.getInstance('Cities', 'cities', [], {
+      skipOrderBy: true
+    });
+    this.citiesStore.afterQuery = (rows: Row[]) => {
+      if (this.newCityEntered) {
+        const form = this.salesForm.controls['projectDetails'] as FormGroup;
+        form.controls['projectCity'].setValue(this.newCityEntered);
+        // this.newCityEntered = null;
+      }
+      return rows;
+    };
     this.statesStore.whereClause = 'country_id = ?';
+    this.citiesStore.whereClause = 'state_id = ?';
     this.exclusionsInclusionsStore = this.storeService.getInstance(
       'ExclusionsInclusions',
       'ExclusionsInclusions',
@@ -548,6 +706,14 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
       [],
       {
         whereClause: 'sales_id = ?',
+        orderByClause: 'update_date asc'
+      }
+    );
+    this.estimationScheduleStore = this.storeService.getInstance(
+      'EstimationSchedule',
+      'estimationschedule',
+      [],
+      {
         orderByClause: 'update_date asc'
       }
     );
@@ -567,9 +733,12 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
         this.formFromObject('EstimationsType')
       ),
       oldEstimations: this.formBuilder.array([]),
+      schedules: this.formBuilder.array([]),
       quotation: this.formBuilder.group(this.formFromObject('QuotesType')),
-      oldQuotations: this.formBuilder.array([])
+      oldQuotations: this.formBuilder.array([]),
+      notes: this.formBuilder.array([])
     });
+
     this.salesPersonStore = this.storeService.getInstance('Users', 'users', []);
     this.salesPersonStore.whereClause =
       'user_id in (select user_id from user_roles where role_id =' +
@@ -609,6 +778,8 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
         this.router.navigate(['/sales']);
       } else {
         this.salesRow = res.rows[0];
+        this.salesCommentsStore.whereClauseParams = [this.saleId];
+        this.salesCommentsStore.query();
         this._parseRequirements(<Row>this.salesRow);
         this.copyRowToForm('projectDetails', <Row>this.salesRow);
         this.clientStore.whereClauseParams = [this.salesRow.clientId];
@@ -618,7 +789,13 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
           const country = this.filterCountry(this.salesRow.projectCountry);
           if (country) {
             this.statesStore.whereClauseParams = [country.id];
-            this.statesStore.query();
+            this.statesStore.query().then(() => {
+              const state = this.filterState(this.salesRow.projectState);
+              if (state) {
+                this.citiesStore.whereClauseParams = [state.id];
+                this.citiesStore.query();
+              }
+            });
           }
         }
         this.clientStore.query().then(_res => {
@@ -627,13 +804,18 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
             this.copyRowToForm('clientDetails', <Row>this.clientRow);
           }
         });
+        this.initScheduleForm();
         this.estimationStore.query().then(_res => {
           if (_res.status === Status.SUCCESS) {
             this.estimations = _res.rows;
             if (_res.rows && _res.rows.length > 0) {
               this._parseEstimationRows(_res.rows);
               const oldEstimations = [];
+              const estimateIds = [];
+              let scheduleWhere = 'estimation_id in (';
               _res.rows.forEach((row: EstimationsType, index) => {
+                estimateIds.push(row.id);
+                scheduleWhere += '?,';
                 if (
                   index === _res.rows.length - 1 &&
                   this.salesRow &&
@@ -641,10 +823,11 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
                 ) {
                   this.copyRowToForm('estimations', <Row>row);
                   this.estimationEditing = true;
+                  this.currentEstimationId = row.id;
                 } else {
-                  const control = new FormGroup(
-                    this.formFromObject('EstimationsType')
-                  );
+                  const obj = this.formFromObject('EstimationsType');
+                  obj['schedules'] = new FormControl();
+                  const control = new FormGroup(obj);
                   (<FormArray>this.salesForm.get('oldEstimations')).push(
                     control
                   );
@@ -652,6 +835,31 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
                 }
               });
               this.copyRowsToForm('oldEstimations', oldEstimations);
+              if (scheduleWhere.endsWith(',')) {
+                scheduleWhere = scheduleWhere.substr(
+                  0,
+                  scheduleWhere.length - 1
+                );
+              }
+              scheduleWhere += ') ';
+              this.estimationScheduleStore.whereClause = scheduleWhere;
+              this.estimationScheduleStore.whereClauseParams = estimateIds;
+              this.estimationScheduleStore.query().then(__res => {
+                //  Old SChedules
+                //  Current Schedules
+                if (__res.rows && __res.rows.length > 0) {
+                  const curentSchedules = __res.rows.filter(
+                    (schedule: EstimationScheduleType) =>
+                      schedule.estimationId === this.currentEstimationId
+                  );
+                  this.copyCurrentScheduleRowToForm(curentSchedules);
+                  const oldSchedules = __res.rows.filter(
+                    (schedule: EstimationScheduleType) =>
+                      schedule.estimationId !== this.currentEstimationId
+                  );
+                  this.copyOldScheduleToOldEstimations(oldSchedules);
+                }
+              });
             }
           }
         });
@@ -687,6 +895,11 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
   _parseRequirements(row: Row) {
     if (row.bidType) {
       row.bidType = this.strToArray(row.bidType);
+      row.bidType.forEach(element => {
+        if (this.requirements.indexOf(element) === -1) {
+          this.requirements.push(element);
+        }
+      });
     }
   }
 
@@ -730,6 +943,21 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
         form.controls[key].setValue(currentRow[key]);
       }
     });
+  }
+
+  copyOldScheduleToOldEstimations(oldSchedules: Row[]) {
+    const formArray = this.salesForm.get('oldEstimations')[
+      'controls'
+    ] as FormArray;
+    for (let i = 0; i < formArray.length; i++) {
+      const formGroup = formArray[i];
+      const schedules = oldSchedules.filter(
+        oldSchedule => oldSchedule.estimationId === formGroup.value.id
+      );
+      if (schedules.length > 0) {
+        formGroup['controls']['schedules'].setValue(schedules);
+      }
+    }
   }
 
   copyRowsToForm(formGroup: string, rows: Row[]) {
@@ -782,6 +1010,182 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
+  openNewCityPopup() {
+    this.newCityEntered = null;
+    const state = this.salesForm.value.projectDetails.projectState;
+    if (!state) {
+      return;
+    }
+    this.addNewCityModal.show();
+  }
+  addNewRequirement() {
+    if (
+      this.newRequirement &&
+      this.newRequirement.trim().length > 0 &&
+      this.requirements.indexOf(this.newRequirement) === -1
+    ) {
+      const arr = this.salesForm.value.projectDetails.bidType;
+      arr.push(this.newRequirement);
+      this.requirements.push(this.newRequirement);
+      const form = this.salesForm.controls['projectDetails'] as FormGroup;
+      form.controls['bidType'].setValue(arr);
+    }
+    this.newBidDetailPopup.hide();
+  }
+
+  addNewCity() {
+    if (this.newCityEntered) {
+      const state = this.salesForm.value.projectDetails.projectState;
+      if (!state) {
+        return;
+      }
+      const selectedStates = this.statesStore.rows.filter(
+        _state => _state.name === state
+      );
+      if (selectedStates.length > 0) {
+        const newCity: Row = {
+          name: this.newCityEntered,
+          state_id: selectedStates[0].id,
+          $operation$: QueryOperation.INSERT
+        };
+        this.citiesStore.saveRows([newCity]).then(res => {
+          this.addNewCityModal.hide();
+          this.newCityEntered = null;
+        });
+      }
+    }
+  }
+
+  addNewSchedule(scheduleName: string) {
+    const formGroup = new FormGroup(
+      this.formFromObject('EstimationScheduleType')
+    );
+    formGroup.controls['$operation$'].setValue(QueryOperation.INSERT);
+    formGroup.controls['scheduleName'].setValue(scheduleName);
+    (<FormArray>this.salesForm.get('schedules')).push(formGroup);
+  }
+
+  isScheduleExists(scheduleName: string) {
+    let isExists = false;
+    const formGoups = this.salesForm.get('schedules')['controls'];
+    if (formGoups.length > 0) {
+      formGoups.forEach(formGoup => {
+        if (formGoup.value && formGoup.value.scheduleName === scheduleName) {
+          if (formGoup.value.operation === QueryOperation.DELETE) {
+            formGoup.controls['$operation$'].setValue(QueryOperation.UPDATE);
+          }
+          isExists = true;
+        }
+      });
+    }
+    return isExists;
+  }
+  addScheduleIfNotExists(scheduleName: string) {
+    if (!this.isScheduleExists(scheduleName)) {
+      this.addNewSchedule(scheduleName);
+    }
+  }
+
+  deleteScheduleIfExists(requirements: string[]) {
+    const formGoups = this.salesForm.get('schedules')['controls'];
+    const toBedelete = [];
+    if (formGoups.length > 0) {
+      formGoups.forEach((formGoup, index) => {
+        if (requirements.indexOf(formGoup.value.scheduleName) === -1) {
+          const operation = formGoup.value.$operation$;
+          if (operation === QueryOperation.INSERT) {
+            toBedelete.push(index);
+          } else {
+            formGoup.controls['$operation$'].setValue(QueryOperation.DELETE);
+          }
+        }
+      });
+    }
+    if (toBedelete.length > 0) {
+      const schedulesArray = <FormArray>this.salesForm.get('schedules');
+      toBedelete.forEach((groupIndex, index) => {
+        schedulesArray.removeAt(groupIndex);
+      });
+    }
+  }
+
+  initNotesForm() {
+    const formGroup = new FormGroup(this.formFromObject('Notes'));
+    formGroup.controls['$operation$'].setValue(QueryOperation.INSERT);
+    formGroup.controls['title'].setValue('Requirements from client');
+    formGroup.controls['content'].setValue('Test this one');
+    (<FormArray>this.salesForm.get('notes')).push(formGroup);
+  }
+
+  initScheduleForm() {
+    const requirements = this.salesForm.value.projectDetails.bidType;
+    const _list = [];
+    requirements.forEach(requirement => {
+      if (requirement === 'Engineering') {
+        const label = 'Main Steel';
+        _list.push(label);
+        this.addScheduleIfNotExists(label);
+      } else if (requirement === 'Miscellaneous') {
+        const label = 'Misc Steel';
+        _list.push(label);
+        this.addScheduleIfNotExists(label);
+      } else {
+        if (requirement !== 'Structural') {
+          this.addScheduleIfNotExists(requirement);
+          _list.push(requirement);
+        }
+      }
+    });
+    // this.deleteScheduleIfExists(_list);
+  }
+  copyCurrentScheduleRowToForm(schedules: EstimationScheduleType[]) {
+    const formGoups = this.salesForm.get('schedules')['controls'];
+    if (formGoups.length > 0) {
+      formGoups.forEach(formGoup => {
+        if (formGoup.value && formGoup.value.scheduleName) {
+          const filtered = schedules.filter(
+            schedule => schedule.scheduleName === formGoup.value.scheduleName
+          );
+          if (filtered.length > 0) {
+            const schdule = filtered[0];
+            Object.keys(schdule).forEach(key => {
+              if (formGoup.value.hasOwnProperty(key)) {
+                formGoup.controls[key].setValue(schdule[key]);
+              }
+            });
+            formGoup.controls['$operation$'].setValue(QueryOperation.UPDATE);
+          }
+        }
+      });
+    }
+  }
+
+  onRequirementsChange(open: string) {
+    if (!open) {
+    }
+  }
+
+  onStateChange = (open: string) => {
+    if (!open) {
+      const state = this.salesForm.value.projectDetails.projectState;
+      if (!state) {
+        return;
+      }
+      if (this.statesStore && this.statesStore.rows) {
+        const selectedStates = this.statesStore.rows.filter(
+          _state => _state.name === state
+        );
+        if (selectedStates.length > 0) {
+          const form = this.salesForm.controls['projectDetails'] as FormGroup;
+          form.controls['projectCity'].setValue(null);
+          this.citiesStore.whereClause = 'state_id = ?';
+          this.citiesStore.whereClauseParams = [selectedStates[0].id];
+          this.citiesStore.query();
+        }
+      }
+    }
+  };
+
   onCountryChange = open => {
     if (!open) {
       const country = this.salesForm.value.projectDetails.projectCountry;
@@ -809,6 +1213,16 @@ export class SaleDetailsComponent implements OnInit, OnDestroy {
       );
       if (selectedCoutries.length > 0) {
         return selectedCoutries[0];
+      }
+    }
+  }
+  filterState(stateName: string) {
+    if (this.statesStore && this.statesStore.rows) {
+      const selectedStates = this.statesStore.rows.filter(
+        _state => _state.name === stateName
+      );
+      if (selectedStates.length > 0) {
+        return selectedStates[0];
       }
     }
   }

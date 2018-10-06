@@ -63,7 +63,7 @@ const moveNextError = (
 
 const errorResponse = (code: CODE, msg: string) => {
   const response: Response = Utils.initializeErrorRespose();
-  response.responseCode = code;
+  response.responseCode = CODE.ERROR;
   response.message = msg;
   logger.log(LogType.ERROR, 'MiddleWare-APIRouter: ' + msg);
   return response;

@@ -29,6 +29,7 @@ export type QueryRequest = {
   alias: string;
   actionParams?: Map;
   selectParams?: string[];
+  excludeParams?: string[];
   whereClause?: string;
   whereClauseParams?: any[];
   orderByClause?: string;

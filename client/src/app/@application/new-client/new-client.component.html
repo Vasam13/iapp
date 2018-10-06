@@ -23,6 +23,7 @@
     <div class="card card-transparent">
       <div class="card-body p-t-0">
         <form
+          #form="ngForm"
           id="new-client-form"
           role="form"
           autocomplete="on"
@@ -231,6 +232,7 @@
                 >
                   <label>State</label>
                   <pg-select
+                    (OpenChange)="onStateChange($event)"
                     style="width: 100%;"
                     formControlName="state"
                     [PlaceHolder]="'Select Option'"
@@ -253,14 +255,31 @@
                   class="form-group form-group-default required"
                   [class.has-error]="isFieldValid('city')"
                 >
-                  <label>City</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    name="city"
+                  <label>
+                    <div>
+                      <span>City</span>
+                      <span
+                        (click)="openNewCityPopup()"
+                        class="add-new-option-link"
+                      >
+                        Not found? Click here
+                      </span>
+                    </div>
+                  </label>
+                  <pg-select
+                    style="width: 100%;"
                     formControlName="city"
+                    [PlaceHolder]="'Select Option'"
+                    AllowClear
+                    ShowSearch
                     required
                   >
+                    <pg-option
+                      *ngFor="let city of citiesStore.rows"
+                      [Label]="city.name"
+                      [Value]="city.name"
+                    > </pg-option>
+                  </pg-select>
                   <div
                     class="invalid-tooltip"
                     *ngIf="isFieldValid('city')"
@@ -288,6 +307,61 @@
             </div>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  bsModal
+  #addNewCityModal="bs-modal"
+  class="modal fade slide-up disable-scroll"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="false"
+>
+  <div class="modal-dialog modal-md">
+    <div class="modal-content-wrapper">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 m-t-20">
+              <form>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label>
+                      Add New City
+                    </label>
+                    <div class="
+                          form-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="remarks"
+                        placeholder="Enter City Name"
+                        [(ngModel)]="newCityEntered"
+                      >
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 m-t-10  text-center">
+              <button
+                class="btn btn-tag btn-complete  btn-tag-primary btn-tag-rounded m-r-5"
+                (click)="addNewCity()"
+                type="button"
+                [disabled]="!newCityEntered || citiesStore.isBusy"
+              >Save</button>
+              <button
+                class="btn btn-tag btn-complete  btn-tag-primary btn-tag-rounded m-r-5"
+                (click)="addNewCityModal.hide()"
+                type="button"
+              >Cancel</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -78,14 +78,23 @@ CREATE TABLE estimations (
     version_number int(11) NOT NULL,
     main_steel_inclusions varchar(500) NULL,
     main_steel_exclusions varchar(500) NULL,
-    main_steel_hours varchar(11) NOT NULL,
-    main_steel_schedule varchar(11) NOT NULL,
     misc_steel_inclusions varchar(500) NULL,
     misc_steel_exclusions varchar(500) NULL,
-    misc_steel_hours varchar(11) NOT NULL,
-    misc_steel_schedule varchar(11) NOT NULL,
     remarks varchar(1024) NULL,
     sales_remarks varchar(1024) NULL,
+    create_date datetime NOT NULL,
+    create_user_id int(11) NOT NULL,
+    update_date datetime NOT NULL,
+    update_user_id int(11) NOT NULL
+);
+
+DROP TABLE IF EXISTS estimation_schedule;
+CREATE TABLE estimation_schedule (
+    id  INT(11) primary key auto_increment,
+    estimation_id INT(11),
+    schedule_name  varchar(50) NULL,
+    schedule_hours varchar(11) NOT NULL,
+    schedule_weeks varchar(11) NOT NULL,
     create_date datetime NOT NULL,
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
@@ -120,6 +129,7 @@ CREATE TABLE users(
 	avatar_url VARCHAR(200) NULL,
 	avatar_blob BLOB NULL,
     password_changed VARCHAR(2) NULL,
+    deleted VARCHAR(1) NULL,
  	create_date datetime NOT NULL,
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
@@ -269,3 +279,15 @@ INSERT INTO `exclusions_inclusions` (`desc`, `type`, `create_user_id`, `create_d
 ('Guard rails','misc_inclusions', 1, SYSDATE(), SYSDATE(), 1),
 ('Bollards', 'misc_inclusions',1, SYSDATE(), SYSDATE(), 1),
 ('Trash gates','misc_inclusions', 1, SYSDATE(), SYSDATE(), 1);
+
+
+DROP TABLE IF exists sales_comments;
+CREATE TABLE `sales_comments` (
+   `id` int(11) primary key auto_increment,
+   `sales_id` int(11) NOT NULL,
+   `comment` varchar(2000) DEFAULT NULL,
+   `create_date` datetime NOT NULL,
+   `create_user_id` int(11) NOT NULL,
+   `update_date` datetime NOT NULL,
+   `update_user_id` int(11) NOT NULL
+);

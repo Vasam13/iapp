@@ -152,3 +152,135 @@ select[disabled] {
   border-color: none !important;
   background-color: #fff !important;
 }
+
+.add-new-option-link {
+  cursor: pointer;
+  float: right;
+  color: blue;
+  margin-right: 20px;
+}
+
+.comment-box-layout {
+  width: 330px;
+  height: 70px;
+  position: absolute;
+  bottom: 2px;
+  border: 1px solid #e6e6e6;
+  padding: 5px;
+  background: #fff;
+  box-shadow: 0 0 9px rgba(191, 191, 191, 0.36);
+  border-left: 1px solid rgba(222, 227, 231, 0.56);
+}
+.comment-box {
+  width: 250px;
+  height: 100%;
+  resize: none;
+  border: 1px solid #e6e6e6;
+  border-radius: 5px;
+  padding: 5px;
+}
+.comment-box-send-div {
+  float: right;
+  height: 66px;
+  width: 68px;
+  vertical-align: middle;
+  text-align: center;
+  padding-top: 13px;
+}
+
+.conversion-box {
+  height: calc(100% - 70px) !important;
+  width: 330px !important;
+}
+
+.no-conversations {
+  position: absolute;
+  top: 100px;
+  text-align: center;
+  width: 100%;
+}
+.list-view ul {
+  border-bottom: none !important;
+}
+
+option[-moz-option] {
+  color: red !important;
+  background-color: #fff !important;
+}
+
+.modal.fade {
+  z-index: 1500 !important;
+}
+.cdk-overlay-container {
+  z-index: 1501 !important;
+}
+pg-select.gird-cell-editor {
+  padding: 0px;
+  border: none;
+}
+.gird-cell-editor > .pg-select-selection {
+  border: none;
+}
+
+input::-ms-clear {
+  width: 0;
+  height: 0;
+}
+
+input[type='time']::-webkit-clear-button {
+  display: none;
+}
+input[type='time']::-ms-clear {
+  display: none;
+}
+input[type='date']::-webkit-clear-button {
+  display: none;
+}
+input[type='date']::-ms-clear {
+  display: none;
+}
+::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* Hide the magnifying glass */
+::-webkit-search-results-button {
+  -webkit-appearance: none;
+}
+
+/* Remove the rounded corners */
+input[type='search'] {
+  -webkit-appearance: none;
+}
+input[type='date']::-webkit-inner-spin-button,
+input[type='date']::-webkit-clear-button {
+  display: none;
+}
+
+.comments-close {
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.commentbox-handle {
+  position: absolute;
+  top: 30%;
+  width: 35px;
+  height: 35px;
+  line-height: 30px;
+  font-size: 18px;
+  padding-top: 5px;
+  background: #fff;
+  border-radius: 0px 4px 4px 0px;
+  text-align: center;
+  box-shadow: 1px 0 9px 0px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: 1px 0 9px 0px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 1px 0 9px 0px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  z-index: 100;
+}
+
+.wysiwug {
+  width: 100%;
+  background: #fff;
+}

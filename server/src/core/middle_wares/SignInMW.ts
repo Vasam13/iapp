@@ -26,12 +26,13 @@ export const SignIn = (
   try {
     Utils.queryUserByName(userName)
       .then((result: Row | void) => {
+        if (!result) {
+          const err = errorResponse(CODE.ERROR, "User doesn't exists");
+          return moveNextError(req, next, err);
+        }
         if (!result || !result.passwordHash) {
-          response = errorResponse(
-            CODE.INVALID_USER_PASS,
-            "User doesn't exists"
-          );
-          return moveNextError(req, next, response);
+          const err = errorResponse(CODE.ERROR, 'Invalid username/password');
+          return moveNextError(req, next, err);
         }
         bcrypt.compare(password, result.passwordHash).then(function(res) {
           if (res) {

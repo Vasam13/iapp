@@ -2,27 +2,39 @@ import { Status, Roles } from '@types';
 import { Row, LeadStatus, DMLResponse } from '@types';
 import { Store, QueryOperation } from '@types';
 import { MessageService } from '@message';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { StoreService } from '@StoreService';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, NgForm } from '@angular/forms';
 import { Utils } from '@utils';
 import ClientsType from './../tables/types/ClientsType';
 import SalesType from './../tables/types/SalesType';
 import { DataUtils } from '../data';
+import { ModalDirective } from 'ngx-bootstrap/modal';
+import { FormCanDeactivate } from './../../@core/components/form/form-can-deactivate';
 
 @Component({
   selector: 'app-new-sale',
   templateUrl: './new-sale.component.html',
   styleUrls: ['./new-sale.component.scss']
 })
-export class NewSaleComponent implements OnInit, OnDestroy {
+export class NewSaleComponent extends FormCanDeactivate
+  implements OnInit, OnDestroy {
   constructor(
     private storeService: StoreService,
     private router: Router,
     private formBuilder: FormBuilder,
     private message: MessageService
-  ) {}
+  ) {
+    super();
+  }
+
+  @ViewChild('form')
+  form: NgForm;
+
+  @ViewChild('addNewCityModal')
+  addNewCityModal: ModalDirective;
+  newCityEntered: string;
 
   public salesForm: FormGroup;
   salesStore: Store;
@@ -31,6 +43,7 @@ export class NewSaleComponent implements OnInit, OnDestroy {
   estimationLeadsStore: Store;
   countryStore: Store;
   statesStore: Store;
+  citiesStore: Store;
 
   requirements = ['Structural', 'Engineering', 'Miscellaneous'];
 
@@ -41,6 +54,7 @@ export class NewSaleComponent implements OnInit, OnDestroy {
       this.salesPersonStore.isBusy ||
       this.estimationLeadsStore.isBusy ||
       this.countryStore.isBusy ||
+      this.statesStore.isBusy ||
       this.statesStore.isBusy
     );
   }
@@ -76,6 +90,7 @@ export class NewSaleComponent implements OnInit, OnDestroy {
       this.salesStore.saveRows(<Row[]>[salesRow]).then((res: DMLResponse) => {
         if (res.rows && res.rows.length > 0) {
           if (res.rows[0].$status$ === Status.SUCCESS) {
+            this.form.form.reset();
             this.gotoSales();
           }
         }
@@ -110,6 +125,7 @@ export class NewSaleComponent implements OnInit, OnDestroy {
     this.salesStore.destroy();
     this.countryStore.destroy();
     this.statesStore.destroy();
+    this.citiesStore.destroy();
     this.salesPersonStore.destroy();
     this.estimationLeadsStore.destroy();
   }
@@ -127,6 +143,17 @@ export class NewSaleComponent implements OnInit, OnDestroy {
     this.statesStore = this.storeService.getInstance('States', 'states', [], {
       skipOrderBy: true
     });
+    this.citiesStore = this.storeService.getInstance('Cities', 'cities', [], {
+      skipOrderBy: true
+    });
+    this.citiesStore.afterQuery = (rows: Row[]) => {
+      if (this.newCityEntered) {
+        const form = this.salesForm.controls['projectDetails'] as FormGroup;
+        form.controls['projectCity'].setValue(this.newCityEntered);
+        // this.newCityEntered = null;
+      }
+      return rows;
+    };
     this.salesStore = this.storeService.getInstance('Sales', 'sales', []);
 
     this.salesPersonStore = this.storeService.getInstance('Users', 'users', []);
@@ -189,6 +216,59 @@ export class NewSaleComponent implements OnInit, OnDestroy {
     const form = this.salesForm.controls[formGroup] as FormGroup;
     const control = form.controls[field];
     return control.invalid && (control.dirty || control.touched);
+  }
+
+  openNewCityPopup() {
+    this.newCityEntered = null;
+    const state = this.salesForm.value.projectDetails.projectState;
+    if (!state) {
+      return;
+    }
+    this.addNewCityModal.show();
+  }
+
+  addNewCity() {
+    if (this.newCityEntered) {
+      const state = this.salesForm.value.projectDetails.projectState;
+      if (!state) {
+        return;
+      }
+      const selectedStates = this.statesStore.rows.filter(
+        _state => _state.name === state
+      );
+      if (selectedStates.length > 0) {
+        const newCity: Row = {
+          name: this.newCityEntered,
+          state_id: selectedStates[0].id,
+          $operation$: QueryOperation.INSERT
+        };
+        this.citiesStore.saveRows([newCity]).then(res => {
+          this.addNewCityModal.hide();
+          this.newCityEntered = null;
+        });
+      }
+    }
+  }
+
+  onStateChange = (open: string) => {
+    if (!open) {
+      const state = this.salesForm.value.projectDetails.projectState;
+      if (!state) {
+        return;
+      }
+      if (this.statesStore && this.statesStore.rows) {
+        const selectedStates = this.statesStore.rows.filter(
+          _state => _state.name === state
+        );
+        if (selectedStates.length > 0) {
+          const form = this.salesForm.controls['projectDetails'] as FormGroup;
+          form.controls['projectCity'].setValue(null);
+          this.citiesStore.whereClause = 'state_id = ?';
+          this.citiesStore.whereClauseParams = [selectedStates[0].id];
+          this.citiesStore.query();
+        }
+      }
+    }
   }
 
   onCountryChange = (open: string) => {

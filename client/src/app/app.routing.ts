@@ -1,3 +1,4 @@
+import { CanDeactivateGuard } from './@core/can-deactivate.guard';
 import { Routes } from '@angular/router';
 // Layouts
 import { CondensedComponent } from './@pages/layouts';
@@ -30,7 +31,7 @@ export const AppRoutes: Routes = [
     path: '',
     pathMatch: 'full',
     data: { state: '/' },
-    component: CondensedComponent,
+    component: CondensedComponent
   },
   {
     path: '',
@@ -114,7 +115,8 @@ export const AppRoutes: Routes = [
       {
         path: 'new',
         component: NewSaleComponent,
-        data: { state: 'sales.new' }
+        data: { state: 'sales.new' },
+        canDeactivate: [CanDeactivateGuard]
       }
     ]
   },
@@ -125,7 +127,8 @@ export const AppRoutes: Routes = [
       {
         path: ':id',
         component: SaleDetailsComponent,
-        data: { state: 'sales.id' }
+        data: { state: 'sales.id' },
+        canDeactivate: [CanDeactivateGuard]
       }
     ]
   },
@@ -147,7 +150,8 @@ export const AppRoutes: Routes = [
       {
         path: ':id',
         component: NewClientComponent,
-        data: { state: 'clients.:id' }
+        data: { state: 'clients.:id' },
+        canDeactivate: [CanDeactivateGuard]
       }
     ]
   },

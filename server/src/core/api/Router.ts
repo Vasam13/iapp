@@ -44,11 +44,19 @@ export default class Router {
       if (!params.ds || !params.column || !params.pk || !params.pkv) {
         return res.send('Missing datasource details!');
       }
-      if (!params.type) {
-        return res.send('Missing type');
+      if (params.ds !== 'attachments') {
+        if (!params.ext) {
+          return res.send('Missing file extension');
+        }
+        if (!params.type) {
+          return res.send('Missing type');
+        }
       }
-      const sql =
-        'SELECT ' +
+      let sql = 'SELECT ';
+      if (params.ds === 'attachments') {
+        sql += 'type, extension, ';
+      }
+      sql +=
         Utils.inverseCamelCase(params.column) +
         ' FROM ' +
         Utils.inverseCamelCase(params.ds) +
@@ -57,29 +65,53 @@ export default class Router {
         ' = ' +
         params.pkv;
       const db = DatabaseManager.getInstance();
-      db.executeQuery(QueryOperation.QUERY, sql).then(_rows => {
-        const rows: Row[] = _rows;
-        if (!rows || rows.length == 0) {
-          return res.send('No row is found');
-        }
-        const _bffr = rows[0][params.column];
-        if (!_bffr) {
-          return res.send('No content is found');
-        }
-        const fileContents = Buffer.from(_bffr, 'base64');
-        const readStream = new stream.PassThrough();
-        readStream.end(fileContents);
-        let disp = 'download';
-        if (params.export && params.export === 'view') {
-          disp = 'inline';
-        }
-        res.set(
-          'Content-disposition',
-          disp + '; filename=' + params.pkv + '.' + params.type
-        );
-        res.set('Content-Type', 'application/pdf');
-        readStream.pipe(res);
-      });
+      db.executeQuery(QueryOperation.QUERY, sql)
+        .then(_rows => {
+          const rows: Row[] = _rows;
+          if (!rows || rows.length == 0) {
+            return res.send('No row is found');
+          }
+          const _bffr = rows[0][params.column];
+          let ext: string = params.ext || rows[0]['extension'];
+          let type = params.type || rows[0]['type'];
+          if (!_bffr && params.ds !== 'users') {
+            return res.send('No content is found');
+          }
+          let fileContents;
+          if (params.ds === 'users' && !_bffr) {
+            const fs = require('fs');
+            let ppPath = '/assets/img/profiles/avatar.jpg',
+              dirPath;
+            if (Utils.getEnvironment() === 'prod') {
+              dirPath = path.join(__dirname, '/../../../public/', ppPath);
+            } else {
+              dirPath = path.join(
+                __dirname,
+                '/../../../../client/src/',
+                ppPath
+              );
+            }
+            fileContents = fs.readFileSync(dirPath);
+          } else {
+            fileContents = Buffer.from(_bffr, 'base64');
+          }
+          const readStream = new stream.PassThrough();
+          readStream.end(fileContents);
+          let disp = 'download';
+          if (params.export && params.export === 'view') {
+            disp = 'inline';
+          }
+          res.set(
+            'Content-disposition',
+            disp + '; filename=' + params.pkv + '.' + type
+          );
+          res.set('Content-Type', ext);
+          readStream.pipe(res);
+        })
+        .catch(err => {
+          logger.log(LogType.ERROR, 'Server error while download ', err);
+          return res.sendStatus(404);
+        });
     });
     this.app.post('/api/upload/*', UploadHandler, (req, res, next) => {
       logger.log(
@@ -106,7 +138,7 @@ export default class Router {
           'Server Request is completed for ' + req.body.userInfo
         );
         if (req.body.errorResponse) {
-          logger.log(LogType.ERROR, req.body.errorResponse);
+          logger.log(LogType.ERROR, '', req.body.errorResponse.message);
           return res.send(req.body.errorResponse);
         }
         if (req.body.successResponse) {

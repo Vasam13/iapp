@@ -19,7 +19,7 @@ export class CondensedComponent extends RootLayout implements OnInit {
     this.displayName = Utils.getDisplayName();
     const userInfo = Utils.getUserInfo();
     this.currYear = Utils.getCurrYear();
-    this.dpPic = userInfo.avatarUrl || 'assets/img/profiles/avatar.jpg';
+    this.dpPic = Utils.getDPUrl();
     Utils.getMenuStates(this.router).forEach((state: State) => {
       this.menuLinks.push(state.menu);
     });

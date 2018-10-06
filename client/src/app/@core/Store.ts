@@ -223,13 +223,18 @@ class StoreImpl implements Store {
   }
 
   public insertRow() {
-    const _row: Row = {
+    let _row: Row = {
       $id$: uuid(),
       $status$: Status.SUCCESS,
       $operation$: QueryOperation.INSERT
     };
+    _row = this.beforeInsert(_row);
     this.rows.unshift(_row);
     this.resetRows();
+  }
+
+  public beforeInsert(_row: Row) {
+    return _row;
   }
 
   private callAfterSave(res: DMLResponse) {
@@ -251,6 +256,14 @@ class StoreImpl implements Store {
           beforeSaveResponse.message
         );
         return resolve(<DMLResponse>beforeSaveResponse);
+      }
+      if (
+        beforeSaveResponse &&
+        beforeSaveResponse.status === Status.SUCCESS &&
+        (<DMLResponse>beforeSaveResponse).rows &&
+        (<DMLResponse>beforeSaveResponse).rows.length > 0
+      ) {
+        rows = (<DMLResponse>beforeSaveResponse).rows;
       }
       this._save(rows).then(res => {
         this.callAfterSave(res);
@@ -282,8 +295,14 @@ class StoreImpl implements Store {
     return new Promise((resolve, reject) => {
       dirtyRows.forEach(row => {
         Object.keys(row).forEach(key => {
-          if (!row.hasOwnProperty(key) || !row[key] || row[key] === null) {
+          if (!row.hasOwnProperty(key) || row[key] == null) {
             delete row[key];
+          }
+          if (row[key] instanceof Date) {
+            row[key] = row[key]
+              .toISOString()
+              .slice(0, 19)
+              .replace('T', ' ');
           }
         });
       });
@@ -304,11 +323,13 @@ class StoreImpl implements Store {
             }
           });
           if (!hasError && resp.status !== Status.ERROR) {
-            Utils.notifySucess(
-              this.message,
-              'Success',
-              'Changes saved successfully'
-            );
+            if (!this.options || !this.options.skipNotifications) {
+              Utils.notifySucess(
+                this.message,
+                'Success',
+                'Changes saved successfully'
+              );
+            }
             this.query().then(_res => {
               return resolve(resp);
             });
@@ -325,6 +346,17 @@ class StoreImpl implements Store {
       mnth = ('0' + (date.getMonth() + 1)).slice(-2),
       day = ('0' + date.getDate()).slice(-2);
     return [date.getFullYear(), mnth, day].join('-');
+  }
+
+  convert2 = str => {
+    const date = new Date(str),
+      mnth = ('0' + (date.getMonth() + 1)).slice(-2),
+      day = ('0' + date.getDate()).slice(-2);
+    return [day, mnth, date.getFullYear()].join('/');
+  }
+
+  public afterQuery(rows: Row[]) {
+    return rows;
   }
 
   public query(): Promise<QueryResponse> {
@@ -355,6 +387,13 @@ class StoreImpl implements Store {
                 resp.rows.forEach(row => {
                   if (row[columnMD.column]) {
                     row[columnMD.column] = this.convert(row[columnMD.column]);
+                    if (columnMD.updateAllowed) {
+                      row[columnMD.column] = this.convert(row[columnMD.column]);
+                    } else {
+                      // row[columnMD.column] = this.convert2(
+                      //   row[columnMD.column]
+                      // );
+                    }
                   }
                 });
               }
@@ -365,6 +404,7 @@ class StoreImpl implements Store {
           });
           this.rows = resp.rows;
           this._originalRows = resp.rows.map(x => Object.assign({}, x));
+          this.rows = this.afterQuery(this.rows);
           this.updateCurrentRow();
           return resolve(resp);
         });

@@ -24,7 +24,8 @@ concat(
     './scripts/sales.sql',
     './scripts/projects.sql',
     './scripts/countries.sql',
-    './scripts/states.sql'
+    './scripts/states.sql',
+    './scripts/cities.sql'
   ],
   './../iapp/scripts/script.sql',
   function(err) {

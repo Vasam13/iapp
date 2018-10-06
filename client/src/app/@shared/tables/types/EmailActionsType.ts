@@ -1,8 +1,8 @@
 export default class EmailActionsType {
   constructor(
     public id?: number,
-    public toEmails?: string,
-    public ccEmails?: string,
+    public toEmails?: any,
+    public ccEmails?: any,
     public datasource?: string,
     public event?: string,
     public condition?: string,

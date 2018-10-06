@@ -15,7 +15,7 @@ export default class Table {
   alias: string = '';
 
   public async beforeQuery(queryRequest: QueryRequest): Promise<any> {}
-  public async afterQuery(row: Row): Promise<void> {}
+  public async afterQuery(rows: Row[]): Promise<void> {}
   public async beforeInsert(row: Row): Promise<void> {}
   public async afterInsert(row: Row): Promise<void> {}
   public async beforeUpdate(row: Row): Promise<void> {}

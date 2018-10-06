@@ -1,14 +1,16 @@
 import Utils from '@Utils';
-import { LeadStatus } from './../../core/data/types';
-import { Row, QueryRequest, Map, LogType, DMLRequest } from '@types';
 import Table from '@Table';
-import logger from '@logger';
-import APIManager from '@APIManager';
-import DatabaseManager from '@DatabaseManager';
-import Sales from '../tables/types/SalesType';
-import GenerateQuotePDF from './GenerateQuotePDF';
+import {
+  Row,
+  QueryRequest,
+  Map,
+  LogType,
+  DMLRequest,
+  QueryOperation
+} from '@types';
+import UsersType from '../tables/types/UsersType';
 
-export default class sales extends Table {
+export default class salescomments extends Table {
   // Below are the variables you can use, their values will be updated at runtime
   // this.skipQuery: boolean;
   // this.skipInsert: boolean;
@@ -23,87 +25,72 @@ export default class sales extends Table {
   // this.table: string;
   // this.alias: string;
   // Logging Eg. logger logger.log(LogType.ERROR, 'Your message...', optional Map);
-  api: APIManager = APIManager.getInstance();
+  // api: APIManager = APIManager.getInstance();
   // db: DatabaseManager = DatabaseManager.getInstance();
 
   public async beforeQuery(queryRequest: QueryRequest) {
-    // Write your code below
-
-    //Don't change below line
-    return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      queryRequest.customSql =
+        'SELECT id, comment, create_date, create_user_id from sales_comments where sales_id = ? ' +
+        'group by create_date, create_user_id, id, comment order by create_date desc';
+      return resolve();
+    });
   }
-
+  moment: any;
   public async afterQuery(_rows: Row[]): Promise<any> {
     return new Promise((resolve, reject) => {
-      return resolve();
+      Utils.getUsers().then((users: UsersType[]) => {
+        _rows.forEach(_row => {
+          if (!this.moment) {
+            this.moment = require('moment');
+          }
+          const date = this.moment(_row.createDate);
+          const time = date.format('HH:mm a');
+          _row.group = date.format('MMMM') + ' ' + date.format('DD');
+          _row.time = time;
+          users.forEach(user => {
+            if (user.userId === _row.createUserId) {
+              _row.userName = user.userName;
+            }
+          });
+        });
+        resolve();
+      });
     });
   }
 
   public async beforeInsert(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Sales = <Sales>_row;
-      // Write your code below
-
-      //Don't change below line
       return resolve();
     });
   }
 
   public async afterInsert(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Sales = <Sales>_row;
-      // Write your code
-
-      //Don't change below line
       return resolve();
     });
   }
 
   public async beforeUpdate(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Sales = <Sales>_row;
-      // Write your code below
-
-      //Don't change below line
       return resolve();
     });
   }
 
   public async afterUpdate(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Sales = <Sales>_row;
-      if (
-        _row.$actionParams$ &&
-        _row.$actionParams$.generateQuotePDF &&
-        _row.$actionParams$.generateQuotePDF === 'Y'
-      ) {
-        if (row.salesId) {
-          GenerateQuotePDF.generate(row.salesId).then(res => {
-            return resolve();
-          });
-        }
-      } else {
-        return resolve();
-      }
+      return resolve();
     });
   }
 
   public async beforeDelete(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Sales = <Sales>_row;
-      // Write your code below
-
-      //Don't change below line
       return resolve();
     });
   }
 
   public async afterDelete(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
-      const row: Sales = <Sales>_row;
-      // Write your code below
-
-      //Don't change below line
       return resolve();
     });
   }

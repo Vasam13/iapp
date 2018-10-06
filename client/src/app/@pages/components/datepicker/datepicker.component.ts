@@ -1,4 +1,7 @@
-import { ConnectedOverlayPositionChange, ConnectionPositionPair } from '@angular/cdk/overlay';
+import {
+  ConnectedOverlayPositionChange,
+  ConnectionPositionPair
+} from '@angular/cdk/overlay';
 import {
   forwardRef,
   ChangeDetectorRef,
@@ -15,7 +18,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import * as moment from 'moment';
 
 import { DayInterface, MonthInterface } from './date';
-import { dropDownAnimation,scaleInAnimation } from '../../animations/dropdown-animations';
+import {
+  dropDownAnimation,
+  scaleInAnimation
+} from '../../animations/dropdown-animations';
 import { DEFAULT_DATEPICKER_POSITIONS } from '../../utils/overlay-position-map';
 
 import { pgTimePickerInnerComponent } from '../time-picker/timepicker-inner.component';
@@ -23,24 +29,20 @@ import { pgDateScroller } from './datepicker-scroller.component';
 import { toBoolean } from '../util/convert';
 import { reqAnimFrame } from '../util/request-animation';
 
-
 @Component({
-  selector     : 'pg-datepicker',
+  selector: 'pg-datepicker',
   encapsulation: ViewEncapsulation.None,
-  animations   : [
-    dropDownAnimation,
-    scaleInAnimation
-  ],
-  templateUrl     : "datepicker.component.html",
-  providers    : [
+  animations: [dropDownAnimation, scaleInAnimation],
+  templateUrl: 'datepicker.component.html',
+  providers: [
     {
-      provide    : NG_VALUE_ACCESSOR,
+      provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => pgDatePickerComponent),
-      multi      : true
+      multi: true
     }
   ],
-  styleUrls    : ['./datepicker.scss'],
-  host         : {
+  styleUrls: ['./datepicker.scss'],
+  host: {
     '[class.ant-calendar-picker]': 'true'
   }
 })
@@ -64,17 +66,23 @@ export class pgDatePickerComponent implements ControlValueAccessor, OnInit {
   _startDecade = Math.floor(this._showYear / 10) * 10;
   _yearPanel: string[][] = [];
   _monthList = [];
-  _positions: ConnectionPositionPair[] = [ ...DEFAULT_DATEPICKER_POSITIONS ];
+  _positions: ConnectionPositionPair[] = [...DEFAULT_DATEPICKER_POSITIONS];
   // ngModel Access
   onChange: (value: Date) => void = () => null;
   onTouched: () => void = () => null;
 
-  @Input() Format = 'YYYY-MM-DD';
-  @Input() Size = '';
-  @Input() Mode: 'day' | 'month' = 'day';
-  @ViewChild('trigger') trigger;
-  @ViewChild(pgTimePickerInnerComponent) timePickerInner: pgTimePickerInnerComponent;
-  @ViewChild('monthSlider') _monthSlider: ElementRef;
+  @Input()
+  Format = 'DD-MM-YYYY';
+  @Input()
+  Size = '';
+  @Input()
+  Mode: 'day' | 'month' = 'day';
+  @ViewChild('trigger')
+  trigger;
+  @ViewChild(pgTimePickerInnerComponent)
+  timePickerInner: pgTimePickerInnerComponent;
+  @ViewChild('monthSlider')
+  _monthSlider: ElementRef;
   @Input()
   set ShowTime(value: Partial<pgTimePickerInnerComponent>) {
     if (typeof value === 'string' || typeof value === 'boolean') {
@@ -91,10 +99,11 @@ export class pgDatePickerComponent implements ControlValueAccessor, OnInit {
 
   @Input()
   set Placeholder(value) {
-    this._placeHolder = value
+    this._placeHolder = value;
   }
 
-  @Input() HideFooter = true;
+  @Input()
+  HideFooter = true;
 
   @Input()
   set AllowClear(value: boolean) {
@@ -136,7 +145,8 @@ export class pgDatePickerComponent implements ControlValueAccessor, OnInit {
   }
 
   onPositionChange(position: ConnectedOverlayPositionChange): void {
-    const _position = position.connectionPair.originY === 'bottom' ? 'top' : 'bottom';
+    const _position =
+      position.connectionPair.originY === 'bottom' ? 'top' : 'bottom';
     if (this._dropDownPosition !== _position) {
       this._dropDownPosition = _position;
       this._cdr.detectChanges();
@@ -223,16 +233,22 @@ export class pgDatePickerComponent implements ControlValueAccessor, OnInit {
       this.Value = day.date.toDate();
       this.onChange(this._value);
     } else {
-      this.Value = moment(this.Value).year(day.date.year()).month(day.date.month()).date(day.date.date()).toDate();
+      this.Value = moment(this.Value)
+        .year(day.date.year())
+        .month(day.date.month())
+        .date(day.date.date())
+        .toDate();
       this.onChange(this._value);
     }
-
   }
 
   _clickMonth(month: MonthInterface): void {
     if (this.Mode === 'month') {
       this._closeCalendar();
-      this.Value = moment(this.Value).year(this._showYear).month(month.index).toDate();
+      this.Value = moment(this.Value)
+        .year(this._showYear)
+        .month(month.index)
+        .toDate();
       this.onChange(this._value);
     } else {
       this._showMonth = month.index;
@@ -296,18 +312,21 @@ export class pgDatePickerComponent implements ControlValueAccessor, OnInit {
         _t.push(i);
       }
     }
-    this._yearPanel[ 0 ].unshift('start');
-    this._yearPanel[ 3 ].push('end');
+    this._yearPanel[0].unshift('start');
+    this._yearPanel[3].push('end');
   }
 
-
-  constructor(private _elementRef: ElementRef, private _cdr: ChangeDetectorRef,private _renderer: Renderer2,private _ngZone: NgZone) {
+  constructor(
+    private _elementRef: ElementRef,
+    private _cdr: ChangeDetectorRef,
+    private _renderer: Renderer2,
+    private _ngZone: NgZone
+  ) {
     this._el = this._elementRef.nativeElement;
   }
 
   ngOnInit(): void {
     this._generateYearPanel();
-    
   }
 
   writeValue(value: Date): void {
@@ -342,5 +361,4 @@ export class pgDatePickerComponent implements ControlValueAccessor, OnInit {
     this._showMonth = moment(this.Value).month();
     this._startDecade = Math.floor(this._showYear / 10) * 10;
   }
-
 }

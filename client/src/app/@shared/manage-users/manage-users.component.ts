@@ -37,6 +37,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   functionsModal: ModalDirective;
   @ViewChild('popupModal')
   popupModal: ModalDirective;
+  @ViewChild('popupPassRessted')
+  popupPassRessted: ModalDirective;
 
   usersStore: Store;
   userRolesStore: Store;
@@ -70,6 +72,19 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     this.functionsModal.show();
   }
 
+  resetPassword = (row: Row, columnMd: ColumnMetaData<RolesTable>) => {
+    row.$actionParams$ = { resetPassword: 'Y' };
+    row.$operation$ = QueryOperation.UPDATE;
+    this.usersStore.saveRows([row]);
+  }
+
+  deleteUser() {
+    const row = this.usersStore.getCurrentRow();
+    row.deleted = 'Y';
+    row.$operation$ = QueryOperation.UPDATE;
+    this.usersStore.saveRows([row]);
+  }
+
   ngOnInit() {
     this.usersStore = this.storeService.getInstance(
       'Users',
@@ -79,21 +94,29 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         autoQuery: true,
         inserAllowed: true,
         updateAllowed: true,
-        deleteAllowed: true
+        deleteAllowed: true,
+        whereClause: 'deleted <> ? or deleted is null',
+        whereClauseParams: ['Y']
       }
     );
     this.usersStore.afterSave = (res: DMLResponse) => {
       if (res && res.rows && res.rows.length > 0) {
         const userAdded = false;
         res.rows.forEach(row => {
-          if (
-            row.$status$ === Status.SUCCESS &&
-            row.$operation$ === QueryOperation.INSERT
-          ) {
-            this.currentUser = row.userName;
-            this.currentEmail = row.emailAddress;
-            this.currentPassword = row.password;
-            this.popupModal.show();
+          if (row.$status$ === Status.SUCCESS) {
+            if (row.$operation$ === QueryOperation.INSERT) {
+              this.currentUser = row.userName;
+              this.currentEmail = row.emailAddress;
+              this.currentPassword = row.password;
+              this.popupModal.show();
+            }
+            if (row.$operation$ === QueryOperation.UPDATE) {
+              if ((row.$actionParams$.resetPassword = 'Y' && row.password)) {
+                this.currentUser = row.userName;
+                this.currentEmail = row.emailAddress;
+                this.popupPassRessted.show();
+              }
+            }
           }
         });
       }
@@ -256,6 +279,18 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         required: true,
         inserAllowed: true,
         updateAllowed: true
+      },
+      {
+        column: '',
+        title: 'Reset Password',
+        type: ColumnType.LINK,
+        linkConfiguration: {
+          text: 'Click Here',
+          onClick: this.resetPassword
+        },
+        inserAllowed: false,
+        updateAllowed: false,
+        required: false
       },
       {
         column: UsersTable.createDate,

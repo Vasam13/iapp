@@ -39,83 +39,57 @@ export const UploadHandler = (
         response = errorResponse(CODE.INVALID_SESSION, message);
         return moveNextError(req, next, response);
       }
-      let serverPath = '/assets/img/profiles/';
-      const ppPath = fields.userId + '.jpg';
-      let newPath: string;
-      let dirPath = '';
-      if (Utils.getEnvironment() === 'prod') {
-        dirPath = path.join(__dirname, '/../../../public/', serverPath);
-      } else {
-        dirPath = path.join(__dirname, '/../../../../client/src/', serverPath);
-      }
-      newPath = path.join(dirPath, ppPath);
-      serverPath = path.join(serverPath, ppPath);
-      const oldPath = _file.file.path;
-      if (fs.existsSync(newPath)) {
-        fs.unlinkSync(newPath);
-      }
-      const setup = {
-        all: {
-          path: dirPath,
-          quality: 80
-        },
-        versions: [
-          {
-            quality: 100,
-            prefix: '',
-            width: 128,
-            height: 128
-          }
-        ]
-      };
-      fs.rename(oldPath, newPath, function(err: any) {
-        if (err) {
-          response = errorResponse(CODE.SYSTEM_ERR, err);
-        }
-        const resizer = require('node-image-resizer');
-        resizer(newPath, setup)
-          .then((res: any) => {
-            const dmlRequest: DMLRequest = {
-              table: 'Users',
-              alias: 'user',
-              rows: [
-                {
-                  $status$: Status.SUCCESS,
-                  $operation$: QueryOperation.UPDATE,
-                  avatarUrl: serverPath,
-                  userId: fields.userId
-                }
-              ],
-              userInfo: <UserInfo>fields
-            };
-            APIManager.getInstance()
-              .executeUpdate(dmlRequest)
-              .then((res: DMLResponse) => {
-                if (
-                  res.rows &&
-                  res.rows.length > 0 &&
-                  res.rows[0].$status$ === Status.SUCCESS
-                ) {
-                  response = {
-                    status: Status.SUCCESS,
-                    name: fields.userId + '.jpg',
-                    url: serverPath
-                  };
-                  req.body.successResponse = response;
-                  next();
-                } else {
-                  response = errorResponse(
-                    CODE.INVALID_DML_OPERATION,
-                    'Error saving userInfo'
-                  );
-                  return moveNextError(req, next, response);
-                }
-              });
-          })
-          .catch((err: any) => {
-            console.log(err);
-          });
-      });
+      const filePath = _file.file.path;
+      const sharp = require('sharp');
+      sharp(filePath)
+        .resize(128)
+        .png()
+        .toBuffer()
+        .then((data: any) => {
+          const dmlRequest: DMLRequest = {
+            table: 'Users',
+            alias: 'user',
+            rows: [
+              {
+                $operation$: QueryOperation.UPDATE,
+                avatarBlob: data,
+                userId: fields.userId
+              }
+            ],
+            userInfo: <UserInfo>fields
+          };
+          APIManager.getInstance()
+            .executeUpdate(dmlRequest)
+            .then((res: DMLResponse) => {
+              if (
+                res.rows &&
+                res.rows.length > 0 &&
+                res.rows[0].$status$ === Status.SUCCESS
+              ) {
+                response = {
+                  status: Status.SUCCESS,
+                  name: fields.userId + '.jpg',
+                  url: ''
+                };
+                req.body.successResponse = response;
+                next();
+              } else {
+                response = errorResponse(
+                  CODE.INVALID_DML_OPERATION,
+                  'Error saving userInfo'
+                );
+                return moveNextError(req, next, response);
+              }
+            });
+        })
+        .catch((err: any) => {
+          logger.log(LogType.ERROR, 'Error while uploading file', err);
+          response = errorResponse(
+            CODE.SYSTEM_ERR,
+            'Error while uploading file'
+          );
+          return moveNextError(req, next, response);
+        });
     });
   } else if (url.endsWith('/file')) {
   } else {

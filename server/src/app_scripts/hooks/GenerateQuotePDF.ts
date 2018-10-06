@@ -15,19 +15,26 @@ export default class GenerateQuotePDF {
       logger.log(LogType.DEBUG, 'Generating PDF for salesId: ' + salesId);
       const pdf = require('html-pdf');
       let html = fs.readFileSync('./src/assets/quote.html', 'utf8'),
-        headerImg = 'file://';
+        headerImg = 'file:///';
       if (Utils.getOSType() === 'windows') {
         headerImg = 'file:///';
       }
       headerImg += path.join(__dirname, './../../assets/header.png');
-      console.log(headerImg);
+      const font_roboto_regular = path.join(
+        __dirname,
+        './../../assets/fonts/Roboto/roboto.woff2'
+      );
+      const font_roboto_bold = path.join(
+        __dirname,
+        './../../assets/fonts/Roboto/Roboto-Bold.ttf'
+      );
       const pdfOptions = {
         header: {
           height: '75px',
           contents:
-            '<div style="width:100%; height:75px;padding-bottom:10px;"><img width="305px" height="65px" class="logo" src="' +
+            '<div style="width:100%; height:75px;margin:10px 0px"><img width="228.75px" height="48.75px" class="logo" src="' +
             headerImg +
-            '"><div style="width:100%;border: 1px solid #e6e6e6"></div></div>'
+            '"><div style="width:100%;height:1px; border-bottom: 1px solid #e6e6e6;margin-top:5px"></div></div>'
         }
       };
       const db = DatabaseManager.getInstance();
@@ -60,6 +67,8 @@ export default class GenerateQuotePDF {
       }
 
       html = html.replace('{logo}', headerImg);
+      html = html.replace('{font_roboto_regular}', font_roboto_regular);
+      html = html.replace('{font_roboto_bold}', font_roboto_bold);
       const Freemarker = require('freemarker');
       const freemarker = new Freemarker();
       const today = Utils.toDay();

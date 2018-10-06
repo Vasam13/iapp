@@ -22,20 +22,49 @@ export class DataUtils {
   static getTypeParams(type: string) {
     if (type === 'ClientsType') {
       return DataUtils.getClientsParams();
-    }
-    if (type === 'SalesType') {
+    } else if (type === 'SalesType') {
       return DataUtils.getSalesParams();
-    }
-    if (type === 'EstimationsType') {
+    } else if (type === 'EstimationsType') {
       return DataUtils.getEstimationsParams();
-    }
-    if (type === 'QuotesType') {
+    } else if (type === 'EstimationScheduleType') {
+      return DataUtils.getEstimationSchedule();
+    } else if (type === 'QuotesType') {
       return DataUtils.getQuotesParams();
-    }
-    if (type === 'ProjectsType') {
+    } else if (type === 'ProjectsType') {
+      return DataUtils.getProjectsType();
+    } else if (type === 'Notes') {
       return DataUtils.getProjectsType();
     }
     return [];
+  }
+
+  static getNotesType() {
+    return [
+      'id',
+      'salesId',
+      'title',
+      'notes',
+      'createDate',
+      'createUserId',
+      'updateDate',
+      'updateUserId',
+      '$operation$'
+    ];
+  }
+
+  static getEstimationSchedule() {
+    return [
+      'id',
+      'estimationId',
+      'scheduleName',
+      'scheduleHours',
+      'scheduleWeeks',
+      'createDate',
+      'createUserId',
+      'updateDate',
+      'updateUserId',
+      '$operation$'
+    ];
   }
 
   static getQuotesParams() {

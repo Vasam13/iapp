@@ -17,6 +17,7 @@ import { MessageModule } from './@pages/components/message/message.module';
 import { MessageService } from './@pages/components/message/message.service';
 import { CookieService } from 'ngx-cookie-service';
 import { pgUploadModule } from './@pages/components/upload/upload.module';
+import { CanDeactivateGuard } from './@core/can-deactivate.guard';
 
 // Routing
 import { AppRoutes } from './app.routing';
@@ -45,6 +46,7 @@ import { pgCardSocialModule } from './@pages/components/card-social/card-social.
 import { pgDatePickerModule } from './@pages/components/datepicker/datepicker.module';
 import { pgSelectfx } from './@pages/components/cs-select/select.module';
 import { pgSelectModule } from './@pages/components/select/select.module';
+import { pgTagModule } from './@pages/components/tag/tag.module';
 
 import { SalesComponent } from './@application/sales/sales.component';
 
@@ -171,9 +173,11 @@ export class AppHammerConfig extends HammerGestureConfig {
     pgDatePickerModule,
     pgSelectfx,
     pgSelectModule,
+    pgTagModule,
     pgUploadModule
   ],
   providers: [
+    CanDeactivateGuard,
     QuickviewService,
     APIService,
     StoreService,

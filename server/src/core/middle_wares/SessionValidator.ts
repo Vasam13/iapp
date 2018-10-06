@@ -26,7 +26,7 @@ export const SessionValidator = (
       responseCode = CODE.INVALID_SESSION;
     }
     userId = Number(token.id);
-    logger.log(LogType.INFO, 'Server session validated for #', token.id);
+    logger.log(LogType.INFO, 'Server session validated for #' + token.id);
   } catch (err) {
     responseCode = CODE.INVALID_SESSION;
   }
@@ -35,17 +35,17 @@ export const SessionValidator = (
   }
   const cachedUser = Server.cache.users[userId];
   if (!cachedUser) {
-    try {
-      Utils.queryUser(userId).then((result: Map | void) => {
+    Utils.queryUser(userId)
+      .then((result: Map | void) => {
         if (result) {
           moveNext(req, next, <UserInfo>result);
         } else {
           return moveNextError(req, next, errorResponse(responseCode));
         }
+      })
+      .catch(error => {
+        return moveNextError(req, next, errorResponse(responseCode));
       });
-    } catch (error) {
-      return moveNextError(req, next, errorResponse(responseCode));
-    }
   } else {
     return moveNext(req, next, cachedUser);
   }
@@ -70,7 +70,7 @@ const moveNext = (
 };
 const errorResponse = (code: CODE) => {
   const response: Response = Utils.initializeErrorRespose();
-  response.responseCode = code;
+  response.responseCode = CODE.ERROR;
   const message = 'Session expires, please login and try again';
   response.message = message;
   logger.log(LogType.ERROR, 'MiddleWare-SessionValidator: ' + message);

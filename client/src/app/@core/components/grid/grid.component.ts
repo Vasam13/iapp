@@ -1,5 +1,5 @@
 import { filter } from 'rxjs/operators/filter';
-import { Store } from '@types';
+import { Store, ColumnType } from '@types';
 import { Component, OnInit, ViewChild, Input } from '@angular/core';
 import { Output, EventEmitter } from '@angular/core';
 import { MessageService } from '@message';
@@ -31,7 +31,7 @@ export class GridComponent implements OnInit {
       mnth = ('0' + (date.getMonth() + 1)).slice(-2),
       day = ('0' + date.getDate()).slice(-2);
     return [date.getFullYear(), mnth, day].join('/');
-  };
+  }
 
   isVisible(row, md) {
     if (md.visible) {
@@ -42,6 +42,25 @@ export class GridComponent implements OnInit {
 
   isSelectColumn(md) {
     return md.type === 'select' && md.dropDownConfiguration;
+  }
+
+  isCheckboxColumn(md) {
+    return md.type === 'checkbox';
+  }
+
+  getCheckboxValue(row, md) {
+    return row[md.column] === 'Y';
+  }
+
+  getInputType(columnMD) {
+    if (columnMD.type === ColumnType.DATE && !columnMD.updateAllowed) {
+      return ColumnType.STRING;
+    }
+    return columnMD.type;
+  }
+
+  onCheckboxChanged(row, md) {
+    row[md.column] = row[md.column] ? 'Y' : 'N';
   }
 
   getSelectDisplayValue(row, md) {

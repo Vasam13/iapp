@@ -24,10 +24,12 @@ export interface Store {
   clickHandler(row: Row, columnMd: ColumnMetaData<Map>): void;
   isEditable(row: Row, columnMd: ColumnMetaData<Map>): boolean;
   hasErrors(row: Row, columnMd: ColumnMetaData<Map>): boolean;
+  afterQuery(rows: Row[]): void;
   query(): Promise<QueryResponse>;
   saveRows(rows: Row[]): Promise<DMLResponse>;
   save(): Promise<DMLResponse>;
   destroy(): void;
+  beforeInsert(row: Row): void;
   insertRow(): void;
   onRowSelect(val: any);
   setCurrentColumn(rowIndex: number, columnIndex: number): void;
@@ -82,9 +84,12 @@ export enum ColumnType {
   STRING = 'text',
   NUMBER = 'number',
   DATE = 'date',
+  DATE2 = 'date2',
   DROP_DOWN = 'select',
+
   LINK = 'link',
-  TEMPLETE = 'template'
+  TEMPLETE = 'template',
+  CHECK_BOX = 'checkbox'
 }
 
 export interface ColumnMetaData<T> {
@@ -115,6 +120,7 @@ export interface StoreOption {
   skipOrderBy?: boolean;
   actionsParams?: Map;
   selectParams?: string[];
+  skipNotifications?: boolean;
 }
 
 export enum NotifType {

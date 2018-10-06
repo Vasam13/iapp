@@ -30,17 +30,23 @@ export class Utils {
     style?: NotifStyle
   ) {
     // notification.remove();
+    let Duration = 4000;
     if (!position) {
       position = NotifPosition.TOP_LEFT;
     }
     if (!style) {
       style = NotifStyle.SIMPLE;
     }
+    if (type === NotifType.SUCCESS) {
+      style = NotifStyle.BAR;
+      Duration = 2000;
+    }
+    service.remove();
     service.create(type, msg, {
       Title: title,
       Position: position,
       Style: style,
-      Duration: 0
+      Duration
     });
   }
 
@@ -219,6 +225,17 @@ export class Utils {
       return RootScope.userInfo.displayName;
     }
     return '';
+  }
+
+  static getDPUrl(userId?: number) {
+    let ppUrl =
+      'type=png&ext=image/png&export=view&ds=users&column=avatarBlob&pk=user_id&pkv=';
+    if (userId == null) {
+      ppUrl += RootScope.userInfo.userId;
+    } else {
+      ppUrl += userId;
+    }
+    return '/api/download/' + btoa(ppUrl);
   }
 
   static getUserInfo() {

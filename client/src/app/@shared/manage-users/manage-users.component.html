@@ -5,7 +5,7 @@
 
     <button
       class="btn btn-primary btn-cons pull-right m-b-10"
-      (click)="usersStore.deleteSelected()"
+      (click)="deleteUser()"
     >
       <em class="icon-trash"></em>&nbsp;Delete</button>
     <button
@@ -174,6 +174,47 @@
               <button
                 class="btn btn-primary btn-rounded m-t-5"
                 (click)="popupModal.hide()"
+                type="button"
+              >Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+</div>
+
+
+<div
+  bsModal
+  #popupPassRessted="bs-modal"
+  class="modal fade slide-up disable-scroll"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="false"
+>
+  <div class="modal-dialog modal-md">
+    <div class="modal-content-wrapper">
+      <div class="modal-content">
+        <div class="modal-header clearfix text-left">
+          <button
+            class="close"
+            (click)="popupPassRessted.hide()"
+            type="button"
+          ><i class="pg pg-close fs-14"></i>
+          </button>
+          <h5><span class="semi-bold">Success</span></h5>
+          <p class="p-b-10">Password is re-generated successfully for <span class="bold">{{currentUser}}</span>,
+            an email is sent to <span class="bold">{{currentEmail}}</span></p>
+          <!-- <span *ngIf="currentPassword"><h5>Password: <span class="semi-bold">{{currentPassword}}</span></h5></span> -->
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 m-t-10  text-center">
+              <button
+                class="btn btn-primary btn-rounded m-t-5"
+                (click)="popupPassRessted.hide()"
                 type="button"
               >Close</button>
             </div>

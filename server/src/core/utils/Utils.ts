@@ -1,4 +1,4 @@
-import { EmailProps } from './../data/types';
+import { EmailProps, Users } from './../data/types';
 import { CODE } from '@Codes';
 import { UserInfo, Map, Properties, HttpRequestParams } from '@types';
 import PropertiesReader from 'properties-reader';
@@ -16,10 +16,41 @@ import TextUtils from './TextUtils';
 import * as jwt from 'jsonwebtoken';
 import path from 'path';
 import nodemailer from 'nodemailer';
+import UsersType from 'app_scripts/tables/types/UsersType';
 
 export default class Utils {
   static cachedProperties: Properties;
+  static cachedUsers: UsersType[];
 
+  static getUserById = (userId: number): Promise<UsersType> => {
+    return new Promise((resolve, reject) => {
+      Utils.getUsers()
+        .then(users => {
+          for (var i = 0; i < users.length; i++) {
+            if (users[i].userId === userId) {
+              return resolve(users[i]);
+            }
+          }
+          resolve();
+        })
+        .catch(err => reject(err));
+    });
+  };
+
+  static getUsers = (): Promise<UsersType[]> => {
+    return new Promise((resolve, reject) => {
+      if (Utils.cachedUsers) {
+        resolve(Utils.cachedUsers);
+      } else {
+        Utils.queryUsers()
+          .then(rows => {
+            Utils.cachedUsers = <UsersType[]>rows;
+            resolve(Utils.cachedUsers);
+          })
+          .catch(err => reject(err));
+      }
+    });
+  };
   static getProps = (): Properties => {
     if (!Utils.cachedProperties) {
       const reader = PropertiesReader('./../.properties');
@@ -109,22 +140,24 @@ export default class Utils {
     }
   }
 
-  static async queryUserByName(userName: string): Promise<Row | void> {
-    const sql: string = 'SELECT * FROM USERS WHERE USER_NAME = ? ';
-    try {
-      const rows: Row[] = <Row[]>(
-        await DatabaseManager.getInstance().executeQuery(
-          QueryOperation.QUERY,
-          sql,
-          [userName]
-        )
-      );
-      if (rows && rows.length > 0) {
-        return rows[0];
+  static queryUserByName(userName: string): Promise<Row | void> {
+    return new Promise(async (resolve, reject) => {
+      const sql: string = Utils.getUserSelectClause() + ' WHERE USER_NAME = ? ';
+      try {
+        const rows: Row[] = <Row[]>(
+          await DatabaseManager.getInstance().executeQuery(
+            QueryOperation.QUERY,
+            sql,
+            [userName]
+          )
+        );
+        if (rows && rows.length > 0) {
+          return resolve(rows[0]);
+        }
+      } catch (error) {
+        return reject(error);
       }
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    });
   }
 
   static queryUserRoles(userId: number): Promise<Row[]> {
@@ -179,22 +212,44 @@ export default class Utils {
       sessionId: ''
     };
   }
-  static async queryUser(userId: number): Promise<Row | void> {
-    const sql: string = 'SELECT * FROM USERS WHERE USER_ID = ? ';
+  static getUserSelectClause() {
+    return 'select user_id, user_name, display_Name, email_address,password_Changed, password_hash from users';
+  }
+  static async queryUsers(): Promise<Row[] | void> {
+    const sql: string =
+      Utils.getUserSelectClause() + ' where deleted is null or deleted <> ?';
     try {
       const rows: Row[] = <Row[]>(
         await DatabaseManager.getInstance().executeQuery(
           QueryOperation.QUERY,
           sql,
-          [userId]
+          ['Y']
         )
       );
-      if (rows && rows.length > 0) {
-        return rows[0];
-      }
+      return rows;
     } catch (error) {
       return Promise.reject(error);
     }
+  }
+  static queryUser(userId: number): Promise<Row | void> {
+    return new Promise(async (resolve, reject) => {
+      const sql: string = Utils.getUserSelectClause() + ' WHERE USER_ID = ? ';
+      let rows: Row[];
+      try {
+        rows = <Row[]>(
+          await DatabaseManager.getInstance().executeQuery(
+            QueryOperation.QUERY,
+            sql,
+            [userId]
+          )
+        );
+      } catch (err) {
+        return reject(err);
+      }
+      if (rows && rows.length > 0) {
+        return resolve(rows[0]);
+      }
+    });
   }
 
   static dMLUpdateOf(dMLRequest: DMLRequest, instance: Table) {
@@ -218,7 +273,8 @@ export default class Utils {
   };
 
   static isReservedWord = (str: string): boolean => {
-    return !(Utils.getReservedWords().indexOf(str) === -1);
+    return str.startsWith('$') && str.endsWith('$');
+    // return !(Utils.getReservedWords().indexOf(str) === -1);
   };
   static _toCamelCase(str: string) {
     if (Utils.isReservedWord(str)) {
@@ -318,7 +374,7 @@ export default class Utils {
     for (const key in row) {
       if (Utils.isReservedWord(key)) continue;
       if (row.hasOwnProperty(key)) {
-        sql += Utils.inverseCamelCase(key) + ',';
+        sql += '`' + Utils.inverseCamelCase(key) + '`,';
         values += '?,';
         params.push(row[key]);
       }
@@ -339,7 +395,7 @@ export default class Utils {
     for (const key in row) {
       if (Utils.isReservedWord(key)) continue;
       if (row.hasOwnProperty(key)) {
-        sql += Utils.inverseCamelCase(key) + '=?,';
+        sql += '`' + Utils.inverseCamelCase(key) + '`=?,';
         params.push(row[key]);
       }
     }
@@ -393,32 +449,45 @@ export default class Utils {
     }
   }
 
-  static parseQueryParams(queryParams: QueryRequest): string {
-    let sql = 'SELECT ';
-    if (queryParams.selectParams) {
-      queryParams.selectParams.forEach(param => {
-        sql += Utils.inverseCamelCase(param) + ',';
-      });
-    } else {
-      sql += '*';
-    }
-    if (sql.endsWith(',')) {
-      sql = sql.substring(0, sql.length - 1);
-    }
-    sql += ' FROM ' + Utils.inverseCamelCase(queryParams.table);
-    if (queryParams.whereClause) {
-      sql += ' WHERE ' + queryParams.whereClause;
-    }
-    if (queryParams.orderByClause) {
-      sql += ' ORDER BY ' + queryParams.orderByClause;
-    }
-    if (queryParams.limit) {
-      sql += ' LIMIT ' + queryParams.limit;
-    }
-    if (queryParams.offset) {
-      sql += ' OFFSET ' + queryParams.offset;
-    }
-    return sql;
+  static parseQueryParams(queryParams: QueryRequest): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      let columns: Map = {};
+      try {
+        columns = await Utils.getTableColmns(queryParams.table);
+      } catch (err) {
+        return reject(err);
+      }
+      let sql = 'SELECT ';
+      if (queryParams.selectParams) {
+        queryParams.selectParams.forEach(param => {
+          sql += '`' + Utils.inverseCamelCase(param) + '`,';
+        });
+      } else {
+        Object.keys(columns).forEach((key: string) => {
+          if (columns[key] !== 'blob') {
+            sql += '`' + Utils.inverseCamelCase(key) + '`,';
+          }
+          111;
+        });
+      }
+      if (sql.endsWith(',')) {
+        sql = sql.substring(0, sql.length - 1);
+      }
+      sql += ' FROM ' + Utils.inverseCamelCase(queryParams.table);
+      if (queryParams.whereClause) {
+        sql += ' WHERE ' + queryParams.whereClause;
+      }
+      if (queryParams.orderByClause) {
+        sql += ' ORDER BY ' + queryParams.orderByClause;
+      }
+      if (queryParams.limit) {
+        sql += ' LIMIT ' + queryParams.limit;
+      }
+      if (queryParams.offset) {
+        sql += ' OFFSET ' + queryParams.offset;
+      }
+      return resolve(sql);
+    });
   }
 
   static logSQLResponse(response: QueryResponse) {
@@ -492,7 +561,12 @@ export default class Utils {
     const db = DatabaseManager.getInstance();
     table = Utils.inverseCamelCase(table);
     const sql: string = 'SHOW COLUMNS FROM ' + table;
-    const rows: Row[] = <Row[]>await db.executeQuery(QueryOperation.QUERY, sql);
+    let rows: Row[];
+    try {
+      rows = <Row[]>await db.executeQuery(QueryOperation.QUERY, sql);
+    } catch (err) {
+      return Promise.reject(err);
+    }
     const _columns: Map = {};
     if (!rows || rows.length == 0) {
       console.log('No columns are found!!!');
@@ -505,12 +579,12 @@ export default class Utils {
         type = 'number';
       } else if (type.indexOf('date') > -1) {
         type = 'Date';
-      } else {
+      } else if (type.indexOf('varchar') > -1) {
         type = 'string';
       }
       _columns[name] = type;
     });
-    return _columns;
+    return Promise.resolve(_columns);
   }
 
   static generateAppScriptsCMD() {

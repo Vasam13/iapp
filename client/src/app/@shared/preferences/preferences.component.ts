@@ -6,7 +6,7 @@ import {
 } from './../../@pages/components/upload/interface';
 import { pgUploadBtnComponent } from './../../@pages/components/upload/upload-btn.component';
 import { DataUtils } from './../../@application/data';
-import {Utils} from '@utils';
+import { Utils } from '@utils';
 import {
   Component,
   OnInit,
@@ -47,7 +47,7 @@ export class PreferencesComponent implements OnInit, OnDestroy, AfterViewInit {
       uid: this.userInfo.userId,
       name: this.userInfo.userId + '.jpg',
       status: 'done',
-      url: this.userInfo.avatarUrl || 'assets/img/profiles/avatar.jpg'
+      url: Utils.getDPUrl()
     }
   ];
 
@@ -62,10 +62,11 @@ export class PreferencesComponent implements OnInit, OnDestroy, AfterViewInit {
           this.fileList[0] = {
             uid: 11,
             name: ret.name,
-            url: ret.url,
+            url: Utils.getDPUrl(),
             status: 'done'
           };
-          this.popup.show();
+          // this.popup.show();
+          window.location.href = this.router.url;
         } else {
           Utils.notifyError(this.message, 'Error while upload', ret.message);
         }
