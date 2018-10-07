@@ -9,7 +9,6 @@ import {
   Response,
   Status,
   Roles,
-  Functions,
   RoleCategory
 } from '@types';
 import * as constants from '@constants';
@@ -199,13 +198,6 @@ export class Utils {
     return [];
   }
 
-  static getFunctions() {
-    if (RootScope.userInfo) {
-      return RootScope.userInfo.functions;
-    }
-    return [];
-  }
-
   static getUserId() {
     if (RootScope.userInfo) {
       return RootScope.userInfo.userId;
@@ -283,18 +275,6 @@ export class Utils {
       }
     });
     return _hasRoleCategory;
-  }
-
-  static hasFunction(functionCode: Functions) {
-    let _hasFunction = false;
-    Utils.getRoles().forEach(element => {
-      if (
-        Utils.onlyText(element.functionCode) === Utils.onlyText(functionCode)
-      ) {
-        _hasFunction = true;
-      }
-    });
-    return _hasFunction;
   }
 
   static deepCompare(a, b) {

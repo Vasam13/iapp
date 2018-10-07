@@ -22,7 +22,6 @@ import { ModalDirective } from 'ngx-bootstrap/modal';
 import { UsersTable } from './../tables/UsersTable';
 import { RolesTable } from '../tables/RolesTable';
 import { UserRolesTable } from '../tables/UserRolesTable';
-import { UserFunctionsTable } from '../tables/UserFunctionsTable';
 
 @Component({
   selector: 'app-manage-users',
@@ -33,8 +32,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   constructor(private storeService: StoreService) {}
   @ViewChild('rolesModal')
   rolesModal: ModalDirective;
-  @ViewChild('functionsModal')
-  functionsModal: ModalDirective;
   @ViewChild('popupModal')
   popupModal: ModalDirective;
   @ViewChild('popupPassRessted')
@@ -42,9 +39,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   usersStore: Store;
   userRolesStore: Store;
-  userFunctionsStore: Store;
   rolesDropDownStore: Store;
-  functionsDropDownStore: Store;
   currentRow: Row;
 
   currentUser: string;
@@ -63,13 +58,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     this.rolesModal.onHidden.subscribe(value => {
       this.showRoles = false;
     });
-  }
-
-  openFunctions = (row: Row, columnMd: ColumnMetaData<RolesTable>) => {
-    this.currentRow = row;
-    this.userFunctionsStore.whereClauseParams = [row.userId];
-    this.userFunctionsStore.query();
-    this.functionsModal.show();
   }
 
   resetPassword = (row: Row, columnMd: ColumnMetaData<RolesTable>) => {
@@ -129,14 +117,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         autoQuery: true
       }
     );
-    this.functionsDropDownStore = this.storeService.getInstance(
-      'Functions',
-      'functions',
-      [],
-      {
-        autoQuery: true
-      }
-    );
     this.userRolesStore = this.storeService.getInstance(
       'UserRoles',
       'userroles',
@@ -148,17 +128,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         whereClause: 'user_id = ?'
       }
     );
-    this.userFunctionsStore = this.storeService.getInstance(
-      'UserFunctions',
-      'userfunctions',
-      this.getUserFunctionsColumnsMd(),
-      {
-        inserAllowed: true,
-        updateAllowed: true,
-        deleteAllowed: true,
-        whereClause: 'user_id = ?'
-      }
-    );
+
     this.userRolesStore.beforeSave = (dirtyRows: Row[]) => {
       const user = this.currentRow;
       const response: Response = {
@@ -180,34 +150,11 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       }
       return response;
     };
-
-    this.userFunctionsStore.beforeSave = (dirtyRows: Row[]) => {
-      const user = this.currentRow;
-      const response: Response = {
-        status: Status.SUCCESS,
-        responseCode: CODE.ERR_BERORE_DML,
-        message: ''
-      };
-      for (let i = 0; i < dirtyRows.length; i++) {
-        const dirtyRow = dirtyRows[i];
-        if (dirtyRow.$operation$ !== QueryOperation.DELETE) {
-          if (user && user.userId && dirtyRow.functionId) {
-            dirtyRows[i].userId = user.userId;
-          } else {
-            response.status = Status.ERROR;
-            response.message = 'Please save/select user first';
-            break;
-          }
-        }
-      }
-      return response;
-    };
   }
   ngOnDestroy() {
     this.usersStore.destroy();
     this.userRolesStore.destroy();
     this.rolesDropDownStore.destroy();
-    this.functionsDropDownStore.destroy();
   }
 
   getUserRolesColumnsMd = (): ColumnMetaData<UserRolesTable>[] => {
@@ -223,24 +170,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           store: this.rolesDropDownStore,
           displayColumn: 'roleName',
           valueColumn: 'roleId'
-        }
-      }
-    ];
-  }
-
-  getUserFunctionsColumnsMd = (): ColumnMetaData<UserFunctionsTable>[] => {
-    return [
-      {
-        column: UserFunctionsTable.functionId,
-        title: 'Function',
-        type: ColumnType.DROP_DOWN,
-        required: true,
-        inserAllowed: true,
-        updateAllowed: false,
-        dropDownConfiguration: {
-          store: this.functionsDropDownStore,
-          displayColumn: 'functionName',
-          valueColumn: 'functionId'
         }
       }
     ];
@@ -309,18 +238,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         updateAllowed: false,
         required: false
       }
-      // {
-      //   column: '',
-      //   title: 'Functions',
-      //   type: ColumnType.LINK,
-      //   linkConfiguration: {
-      //     icon: 'icon-badge',
-      //     onClick: this.openFunctions
-      //   },
-      //   inserAllowed: true,
-      //   updateAllowed: false,
-      //   required: false
-      // }
     ];
   }
 }

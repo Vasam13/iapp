@@ -195,7 +195,6 @@ export interface UserInfo {
   avatarUrl?: string;
   sessionId?: string;
   roles?: Map[];
-  functions?: Map[];
 }
 
 export interface QueryResponse {
@@ -275,16 +274,6 @@ export enum Roles {
   DEVELOPER = 'developer',
   CHECKER = 'checker',
   ALL_USERS = 'allusers'
-}
-
-export enum Functions {
-  SALES = 'sales',
-  ESTIMAIONS = 'estimations',
-  QUOTES = 'quotes',
-  PROJECTS = 'projects',
-  RFI = 'RFI',
-  CCN = 'CCN',
-  BFA = 'BFA'
 }
 
 export enum LeadStatus {

@@ -22,6 +22,7 @@ function read(files, cb) {
 concat(
   [
     './scripts/sales.sql',
+    './scripts/common.sql',
     './scripts/projects.sql',
     './scripts/countries.sql',
     './scripts/states.sql',

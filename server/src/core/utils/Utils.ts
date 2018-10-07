@@ -177,28 +177,9 @@ export default class Utils {
     });
   }
 
-  static queryUserFunctions(userId: number): Promise<Row[]> {
-    return new Promise(resolve => {
-      const sql: string =
-        'SELECT * FROM FUNCTIONS WHERE FUNCTION_ID IN (SELECT FUNCTION_ID FROM' +
-        ' USER_FUNCTIONS WHERE USER_ID = ?)';
-      try {
-        DatabaseManager.getInstance()
-          .executeQuery(QueryOperation.QUERY, sql, [userId])
-          .then(res => {
-            resolve(<Row[]>res);
-          });
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    });
-  }
-
   static async fillUserInfo(userInfo: Map) {
     const roles: Row[] = await Utils.queryUserRoles(userInfo.userId);
-    const functions: Row[] = await Utils.queryUserFunctions(userInfo.userId);
     userInfo.roles = roles;
-    userInfo.functions = functions;
     return Promise.resolve(userInfo);
   }
 

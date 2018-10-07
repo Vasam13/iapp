@@ -1,4 +1,4 @@
-import { Row, Roles, Functions, LeadStatus, ColumnType } from '@types';
+import { Row, Roles, LeadStatus, ColumnType } from '@types';
 import { MessageService } from '@message';
 import { Utils } from '@utils';
 import { Store, Status, QueryOperation } from '@types';
@@ -221,54 +221,13 @@ export class SaleDetailsComponent extends FormCanDeactivate
   }
 
   visibleOldEstimations() {
-    if (
-      Utils.hasAnyRole([
-        Roles.SALES_PERSON,
-        Roles.SALES_MANAGER,
-        Roles.ESTIMATION_MANAGER,
-        Roles.ESTIMATOR
-      ])
-    ) {
-      if (this.salesRow && this.salesRow.status) {
-        if (
-          (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION ||
-            this.salesRow.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION ||
-            this.salesRow.status === LeadStatus.ESTIMATED ||
-            this.salesRow.status === LeadStatus.QUOTED) &&
-          this.estimations.length > 0
-        ) {
-          return true;
-        }
-      }
-    }
+    return this.estimations.length > 0;
   }
   visibleOldQuotations() {
-    if (Utils.hasAnyRole([Roles.ESTIMATOR, Roles.ESTIMATION_MANAGER])) {
-      if (this.salesRow && this.salesRow.status) {
-        if (
-          (this.salesRow.status === LeadStatus.REQUEST_FOR_ESTIMATION ||
-            this.salesRow.status === LeadStatus.ESTIMATED) &&
-          this.estimations.length > 0
-        ) {
-          return true;
-        }
-      }
-    }
+    return this.quotations.length > 0;
   }
   visibleEstimationDiv() {
-    if (Utils.hasAnyRole([Roles.ESTIMATOR, Roles.ESTIMATION_MANAGER])) {
-      if (this.salesRow && this.salesRow.status) {
-        if (
-          (this.salesRow.status === LeadStatus.REQUEST_FOR_ESTIMATION ||
-            this.salesRow.status === LeadStatus.REQUEST_FOR_RE_ESTIMATION ||
-            this.salesRow.status === LeadStatus.ESTIMATED) &&
-          this.estimationEditing
-        ) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return this.estimationEditing;
   }
   visibleSaveEstimationBtn() {
     if (Utils.hasAnyRole([Roles.ESTIMATOR, Roles.ESTIMATION_MANAGER])) {
@@ -321,11 +280,20 @@ export class SaleDetailsComponent extends FormCanDeactivate
     return false;
   }
 
+  quoteBtnText() {
+    let text = 'Re Quote';
+    if (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION) {
+      text = 'Start Quotation';
+    }
+    return text;
+  }
+
   visibleStartQuoteBtn() {
     if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
         if (
           (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION ||
+            this.salesRow.status === LeadStatus.QUOTATION_SENT ||
             this.salesRow.status === LeadStatus.QUOTED) &&
           !this.quotationEditing
         ) {
@@ -357,7 +325,10 @@ export class SaleDetailsComponent extends FormCanDeactivate
   visibleSendForQuoteBtn() {
     if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
-        if (this.salesRow.status === LeadStatus.QUOTED) {
+        if (
+          this.salesRow.status === LeadStatus.QUOTED ||
+          this.quotationEditing
+        ) {
           return true;
         }
       }
@@ -367,7 +338,10 @@ export class SaleDetailsComponent extends FormCanDeactivate
   visibleCloseLeadeBtn() {
     if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
-        if (this.salesRow.status === LeadStatus.QUOTATION_SENT) {
+        if (
+          this.salesRow.status === LeadStatus.QUOTATION_SENT &&
+          !this.quotationEditing
+        ) {
           return true;
         }
       }
@@ -553,7 +527,6 @@ export class SaleDetailsComponent extends FormCanDeactivate
       } else {
         quoteRow = null;
       }
-      console.log(quoteRow);
       salesRow.bidType = this.arrayToString(salesRow.bidType);
       salesRow.$actionParams$ = {
         generateQuotePDF: 'Y'
@@ -853,7 +826,12 @@ export class SaleDetailsComponent extends FormCanDeactivate
         this.clientStore.whereClauseParams = [this.salesRow.clientId];
         this.estimationStore.whereClauseParams = [this.salesRow.salesId];
         this.quotesStore.whereClauseParams = [this.salesRow.salesId];
-        if (this.salesRow.status === LeadStatus.QUOTED) {
+        if (
+          this.salesRow.status === LeadStatus.QUOTED ||
+          this.salesRow.status === LeadStatus.QUOTATION_SENT ||
+          this.salesRow.status === LeadStatus.CLOSED_WIN ||
+          this.salesRow.status === LeadStatus.CLOSED_LOSE
+        ) {
           this.initNotesForm();
         }
         if (this.salesRow.projectCountry) {
@@ -1237,17 +1215,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
   }
 
   visibleShowNotesBtn() {
-    if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
-      if (this.salesRow && this.salesRow.status) {
-        if (
-          this.quotationEditing ||
-          this.salesRow.status === LeadStatus.QUOTED
-        ) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return this.salesNotesStore.rows.length > 0;
   }
 
   initScheduleForm() {
@@ -1317,7 +1285,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
         }
       }
     }
-  };
+  }
 
   onCountryChange = open => {
     if (!open) {
@@ -1337,7 +1305,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
         }
       }
     }
-  };
+  }
 
   filterCountry(countryName: string) {
     if (this.countryStore && this.countryStore.rows) {

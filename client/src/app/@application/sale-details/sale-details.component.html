@@ -1158,7 +1158,7 @@
 
                 <!-- Old Quote revisions-->
                 <div
-                  *ngIf="visibleOldEstimations()"
+                  *ngIf="visibleOldQuotations()"
                   formArrayName="oldQuotations"
                 >
                   <div *ngFor="let ctrl of salesForm.get('oldQuotations')['controls']; let _index = index">
@@ -1409,7 +1409,7 @@
                       class="btn btn-rounded btn-primary m-r-10"
                       [disabled]="isPageBusy()"
                     ><em class="icon-arrow-right"></em>&nbsp;
-                      {{salesRow.status === 'Quoted' ? 'Re Quote' : 'Start Quotation'}}</button>
+                      {{quoteBtnText()}}</button>
                     <button
                       *ngIf="visibleShowNotesBtn()"
                       (click)="showNotes = !showNotes"
@@ -1530,22 +1530,22 @@
         <div class="modal-body">
           <div class="row">
             <div class="col-md-12 m-t-10  text-center">
-              <select
+              <pg-select
                 style="width:250px;padding: 5px;border-radius: 5px;"
-                placeholder='Select an option'
+                PlaceHolder='Select an option'
                 [(ngModel)]="leadFinalStatus"
               >
-                <option
-                  value=""
+                <pg-option
+                  Value="Please Choose..."
                   disabled
                   selected
-                >Please Choose...</option>
-                <option
+                >Please Choose...</pg-option>
+                <pg-option
                   *ngFor="let obj of leadCloseStatus"
-                  [label]="obj.label"
-                  [value]="obj.status"
-                > </option>
-              </select>
+                  [Label]="obj.label"
+                  [Value]="obj.status"
+                > </pg-option>
+              </pg-select>
             </div>
           </div>
           <div class="row">

@@ -9,7 +9,6 @@ import {
 } from '@types';
 import { Store, DMLResponse, Response, Status } from '@types';
 import { RolesTable } from './../tables/RolesTable';
-import { FunctionsTable } from './../tables/FunctionsTable';
 import { CODE } from '@code';
 
 @Component({
@@ -61,25 +60,6 @@ export class ManageRolesComponent implements OnInit, OnDestroy {
     }
   ];
 
-  functionsColumns: ColumnMetaData<FunctionsTable>[] = [
-    {
-      column: FunctionsTable.functionName,
-      title: 'Function',
-      type: ColumnType.STRING,
-      required: true,
-      inserAllowed: true,
-      updateAllowed: true
-    },
-    {
-      column: FunctionsTable.functionCode,
-      title: 'Function Code',
-      type: ColumnType.STRING,
-      required: true,
-      inserAllowed: true,
-      updateAllowed: false
-    }
-  ];
-
   rolesStore: Store = this.storeService.getInstance(
     'Roles',
     'roles',
@@ -92,44 +72,9 @@ export class ManageRolesComponent implements OnInit, OnDestroy {
     }
   );
 
-  functionsStore: Store = this.storeService.getInstance(
-    'Functions',
-    'functions',
-    this.functionsColumns,
-    {
-      autoQuery: true,
-      inserAllowed: true,
-      updateAllowed: true,
-      deleteAllowed: true
-    }
-  );
-
-  ngOnInit() {
-    // this.functionsStore.beforeSave = (dirtyRows: Row[]) => {
-    //   const role = this.rolesStore.getCurrentRow();
-    //   const response: Response = {
-    //     status: Status.SUCCESS,
-    //     responseCode: CODE.ERR_BERORE_DML,
-    //     message: ''
-    //   };
-    //   for (let i = 0; i < dirtyRows.length; i++) {
-    //     const dirtyRow = dirtyRows[i];
-    //     if (dirtyRow.$operation$ !== QueryOperation.DELETE) {
-    //       if (role && role.roleId) {
-    //         dirtyRows[i].roleId = role.roleId;
-    //       } else {
-    //         response.status = Status.ERROR;
-    //         response.message = 'Please save/select roles first';
-    //         break;
-    //       }
-    //     }
-    //   }
-    //   return response;
-    // };
-  }
+  ngOnInit() {}
   ngOnDestroy() {
     this.rolesStore.destroy();
     this.roleCategoryStore.destroy();
-    this.functionsStore.destroy();
   }
 }

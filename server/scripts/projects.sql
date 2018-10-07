@@ -6,6 +6,7 @@ CREATE TABLE `projects` (
     `project_name` varchar(500) DEFAULT NULL,
     `complexity` varchar(100) DEFAULT NULL,
     `po_number` int(11) DEFAULT NULL,
+    `sales_id` int(11) NOT NULL,
     `po_date` date DEFAULT NULL,
     `client_hours` int(11) DEFAULT NULL,
     `received_date` date DEFAULT NULL,
