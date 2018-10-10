@@ -16,6 +16,7 @@ export interface Store {
   whereClause: string;
   whereClauseParams: any[];
   orderByClause: string;
+  actionParams: Map;
   // currentRow: Row;
   columnsMD: ColumnMetaData<Map>[];
   getDirtyRows(): Row[];

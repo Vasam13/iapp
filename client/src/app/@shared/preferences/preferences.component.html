@@ -175,3 +175,36 @@
     <!-- /.modal-content -->
   </div>
 </div>
+
+
+<div
+  bsModal
+  #reloadPopup="bs-modal"
+  class="modal fade slide-up disable-scroll"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="false"
+>
+  <div class="modal-dialog modal-md">
+    <div class="modal-content-wrapper">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 m-t-10  text-center">
+              Refresh/Reload the browser to reflect the changes
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 m-t-10  text-center">
+              <button
+                class="btn btn-primary m-t-5"
+                (click)="reloadPopup.hide()"
+                type="button"
+              >Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

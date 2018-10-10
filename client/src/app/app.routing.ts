@@ -87,17 +87,17 @@ export const AppRoutes: Routes = [
       }
     ]
   },
-  {
-    path: 'settings',
-    component: CondensedComponent,
-    children: [
-      {
-        path: 'email-actions',
-        component: EmailActionsComponent,
-        data: { state: 'settings.email-actions' }
-      }
-    ]
-  },
+  // {
+  //   path: 'settings',
+  //   component: CondensedComponent,
+  //   children: [
+  //     {
+  //       path: 'email-actions',
+  //       component: EmailActionsComponent,
+  //       data: { state: 'settings.email-actions' }
+  //     }
+  //   ]
+  // },
   {
     path: 'settings',
     component: CondensedComponent,

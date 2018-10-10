@@ -34,6 +34,7 @@ export default class SalesType {
     public updateUserId?: number,
     public pdf?: string,
     public isPdfGenerated?: string,
-    public $operation$?: string
+    public $operation$?: string,
+    public pdfTemplate?: string
   ) {}
 }

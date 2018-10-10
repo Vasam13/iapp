@@ -53,6 +53,9 @@ export class SaleDetailsComponent extends FormCanDeactivate
   @ViewChild('form')
   form: NgForm;
 
+  @ViewChild('form')
+  popupForm: NgForm;
+
   isMobile = pg.getUserAgent() === 'mobile';
   public config: PerfectScrollbarConfigInterface = {};
   selectedConv: any;
@@ -75,16 +78,17 @@ export class SaleDetailsComponent extends FormCanDeactivate
   }
   editorModules = {
     toolbar: [
-      // [{ header: [1, 2, 3, 4, false] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ list: 'ordered' }, { list: 'bullet' }]
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      [{ align: [] }],
+      [{ header: [1, 2, 3, 4, 5, 6, false] }]
     ]
   };
   startEstimate = false;
   startQuotaion = false;
   public saleId: number;
   showComments = false;
-  showNotes = false;
 
   salesStore: Store;
   clientStore: Store;
@@ -98,7 +102,6 @@ export class SaleDetailsComponent extends FormCanDeactivate
   statesStore: Store;
   exclusionsInclusionsStore: Store;
   salesCommentsStore: Store;
-  salesNotesStore: Store;
   globalTemplatesStore: Store;
 
   estimations: EstimationsType[] = [];
@@ -147,7 +150,6 @@ export class SaleDetailsComponent extends FormCanDeactivate
       this.citiesStore.isBusy ||
       this.exclusionsInclusionsStore.isBusy ||
       this.salesCommentsStore.isBusy ||
-      this.salesNotesStore.isBusy ||
       this.globalTemplatesStore.isBusy
     );
   }
@@ -180,10 +182,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
     return Utils.hasAnyRole([Roles.ESTIMATION_MANAGER, Roles.ESTIMATOR]);
   }
 
-  readOnlyBidDetails(label) {
-    if (label === 'estimator') {
-      return !this.isEstimationManager();
-    }
+  readOnlyBidDetails() {
     return !(this.isSalesManager() || this.isSalesPerson());
   }
 
@@ -288,6 +287,16 @@ export class SaleDetailsComponent extends FormCanDeactivate
     return text;
   }
 
+  visiblePDFButton() {
+    if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
+      return !!(
+        this.salesForm.value.projectDetails &&
+        this.salesForm.value.projectDetails.pdfTemplate
+      );
+    }
+    return false;
+  }
+
   visibleStartQuoteBtn() {
     if (Utils.hasAnyRole([Roles.SALES_PERSON, Roles.SALES_MANAGER])) {
       if (this.salesRow && this.salesRow.status) {
@@ -349,16 +358,30 @@ export class SaleDetailsComponent extends FormCanDeactivate
     return false;
   }
 
-  _saveSalesRow(salesRow: SalesType) {
+  resetAllForms() {
+    this.form.form.reset();
+    this.popupForm.form.reset();
+  }
+
+  _saveSalesRow(salesRow: SalesType, ignore?: boolean) {
     salesRow.$operation$ = QueryOperation.UPDATE;
     salesRow.bidType = this.arrayToString(salesRow.bidType);
     this.salesStore.saveRows([<Row>salesRow]).then(_res => {
       if (_res.rows[0].$status$ === Status.SUCCESS) {
         // Utils.notifyInfo(this.message, 'Success', 'Lead saved!');
-        this.form.form.reset();
-        this.gotoSales();
+        if (!ignore) {
+          this.resetAllForms();
+          this.gotoSales();
+        }
       }
     });
+  }
+
+  saveSales() {
+    if (this.isFormValid()) {
+      const salesRow: SalesType = this.salesForm.value.projectDetails;
+      this._saveSalesRow(salesRow);
+    }
   }
 
   saveAsDraft() {
@@ -411,8 +434,6 @@ export class SaleDetailsComponent extends FormCanDeactivate
 
   startQuotation() {
     this.quotationEditing = true;
-    this.showNotes = false;
-    this.initNotesForm();
   }
 
   assignEstimaor() {
@@ -466,13 +487,13 @@ export class SaleDetailsComponent extends FormCanDeactivate
                 .then(__res => {
                   if (__res.rows && __res.rows.length > 0) {
                     if (__res.rows[0].$status$ === Status.SUCCESS) {
-                      this.form.form.reset();
+                      this.resetAllForms();
                       this.gotoSales();
                     }
                   }
                 });
             } else {
-              this.form.form.reset();
+              this.resetAllForms();
               this.gotoSales();
             }
           }
@@ -528,37 +549,34 @@ export class SaleDetailsComponent extends FormCanDeactivate
         quoteRow = null;
       }
       salesRow.bidType = this.arrayToString(salesRow.bidType);
-      salesRow.$actionParams$ = {
-        generateQuotePDF: 'Y'
-      };
       this.salesStore.saveRows([<Row>salesRow]).then(() => {
-        const notes = [];
-        const formGoups = this.salesForm.get('notes')['controls'];
-        if (formGoups.length > 0) {
-          formGoups.forEach(formGoup => {
-            const row = formGoup.value;
-            row.salesId = this.salesRow.salesId;
-            if (row.$operation$ === QueryOperation.QUERY) {
-              row.$operation$ = QueryOperation.UPDATE;
+        if (quoteRow != null) {
+          this.quotesStore.saveRows([<Row>quoteRow]).then(_res => {
+            if (_res.rows && _res.rows.length > 0) {
+              if (_res.rows[0].$status$ === Status.SUCCESS) {
+                /*Generate PDF */
+                this.salesStore.actionParams = {
+                  generateQuotePDF : 'Y',
+                  salesId : salesRow.salesId,
+                };
+                this.salesStore.query().then(() => {
+                  this.resetAllForms();
+                  this.gotoSales();
+                });
+              }
             }
-            notes.push(row);
+          });
+        } else {
+          /*Generate PDF */
+          this.salesStore.actionParams = {
+            generateQuotePDF : 'Y',
+            salesId : salesRow.salesId,
+          };
+          this.salesStore.query().then(() => {
+            this.resetAllForms();
+            this.gotoSales();
           });
         }
-        this.salesNotesStore.saveRows(notes).then(() => {
-          if (quoteRow != null) {
-            this.quotesStore.saveRows([<Row>quoteRow]).then(_res => {
-              if (_res.rows && _res.rows.length > 0) {
-                if (_res.rows[0].$status$ === Status.SUCCESS) {
-                  this.form.form.reset();
-                  this.gotoSales();
-                }
-              }
-            });
-          } else {
-            this.form.form.reset();
-            this.gotoSales();
-          }
-        });
       });
     }
   }
@@ -582,7 +600,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
                 'Success',
                 'Lead closed successfully!'
               );
-              this.form.form.reset();
+              this.resetAllForms();
               this.gotoSales();
             }
           }
@@ -612,7 +630,6 @@ export class SaleDetailsComponent extends FormCanDeactivate
     this.estimationLeadsStore.destroy();
     this.estimatorsStore.destroy();
     this.salesCommentsStore.destroy();
-    this.salesNotesStore.destroy();
     this.globalTemplatesStore.destroy();
   }
 
@@ -663,23 +680,13 @@ export class SaleDetailsComponent extends FormCanDeactivate
         skipNotifications: true
       }
     );
-    this.salesNotesStore = this.storeService.getInstance(
-      'SalesNotes',
-      'salesnotes',
-      [],
-      {
-        whereClause: 'sales_id = ?',
-        orderByClause: 'position asc'
-      }
-    );
     this.globalTemplatesStore = this.storeService.getInstance(
       'GlobalTemplates',
       'globaltemplates',
       [],
       {
-        whereClause: 'template_code like ?',
-        whereClauseParams: ['pdf_%'],
-        orderByClause: 'create_date asc'
+        whereClause: 'template_code = ?',
+        whereClauseParams: ['pdf_template']
       }
     );
     this.salesCommentsStore.afterQuery = (rows: Row[]) => {
@@ -776,8 +783,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
       oldEstimations: this.formBuilder.array([]),
       schedules: this.formBuilder.array([]),
       quotation: this.formBuilder.group(this.formFromObject('QuotesType')),
-      oldQuotations: this.formBuilder.array([]),
-      notes: this.formBuilder.array([])
+      oldQuotations: this.formBuilder.array([])
     });
 
     this.salesPersonStore = this.storeService.getInstance('Users', 'users', []);
@@ -826,14 +832,6 @@ export class SaleDetailsComponent extends FormCanDeactivate
         this.clientStore.whereClauseParams = [this.salesRow.clientId];
         this.estimationStore.whereClauseParams = [this.salesRow.salesId];
         this.quotesStore.whereClauseParams = [this.salesRow.salesId];
-        if (
-          this.salesRow.status === LeadStatus.QUOTED ||
-          this.salesRow.status === LeadStatus.QUOTATION_SENT ||
-          this.salesRow.status === LeadStatus.CLOSED_WIN ||
-          this.salesRow.status === LeadStatus.CLOSED_LOSE
-        ) {
-          this.initNotesForm();
-        }
         if (this.salesRow.projectCountry) {
           const country = this.filterCountry(this.salesRow.projectCountry);
           if (country) {
@@ -854,6 +852,7 @@ export class SaleDetailsComponent extends FormCanDeactivate
           }
         });
         this.initScheduleForm();
+        this.initPDF();
         this.estimationStore.query().then(_res => {
           if (_res.status === Status.SUCCESS) {
             this.estimations = _res.rows;
@@ -1158,64 +1157,17 @@ export class SaleDetailsComponent extends FormCanDeactivate
     }
   }
 
-  createNotesFromTemplates(templates: GlobalTemplatesType[]) {
-    templates.forEach((template, index) => {
-      const formGroup = new FormGroup(this.formFromObject('Notes'));
-      formGroup.controls['$operation$'].setValue(QueryOperation.INSERT);
-      formGroup.controls['title'].setValue(template.title);
-      formGroup.controls['content'].setValue(template.content);
-      formGroup.controls['position'].setValue(index);
-      formGroup.controls['code'].setValue(template.templateCode);
-      (<FormArray>this.salesForm.get('notes')).push(formGroup);
-    });
-  }
-  createNotesForm(notes: Row[]) {
-    notes.forEach((note, index) => {
-      const formGroup = new FormGroup(this.formFromObject('Notes'));
-      formGroup.controls['$operation$'].setValue(QueryOperation.UPDATE);
-      Object.keys(note).forEach(key => {
-        if (formGroup.value.hasOwnProperty(key)) {
-          formGroup.controls[key].setValue(note[key]);
-        }
-      });
-      (<FormArray>this.salesForm.get('notes')).push(formGroup);
-    });
-  }
-  saveNotes() {
-    const notes = [];
-    const formGoups = this.salesForm.get('notes')['controls'];
-    if (formGoups.length > 0) {
-      formGoups.forEach(formGoup => {
-        const row = formGoup.value;
-        row.salesId = this.salesRow.salesId;
-        if (row.$operation$ === QueryOperation.QUERY) {
-          row.$operation$ = QueryOperation.UPDATE;
-        }
-        notes.push(row);
-      });
-    }
-    this.salesNotesStore.saveRows(notes);
-  }
-  initNotesForm() {
-    if (this.salesNotesStore.rows.length > 0) {
-      return;
-    }
-    this.salesNotesStore.whereClauseParams = [this.salesRow.salesId];
-    this.salesNotesStore.query().then(res => {
-      if (res.rows && res.rows.length > 0) {
-        this.createNotesForm(res.rows);
-      } else {
+  initPDF() {
+    if (this.salesRow.status === LeadStatus.REQUEST_FOR_QUOTATION) {
+      if (!this.salesRow.pdfTemplate) {
         this.globalTemplatesStore.query().then(_res => {
           if (_res.rows && _res.rows.length > 0) {
-            this.createNotesFromTemplates(_res.rows);
+            const form = this.salesForm.controls['projectDetails'] as FormGroup;
+            form.controls['pdfTemplate'].setValue(_res.rows[0].content);
           }
         });
       }
-    });
-  }
-
-  visibleShowNotesBtn() {
-    return this.salesNotesStore.rows.length > 0;
+    }
   }
 
   initScheduleForm() {

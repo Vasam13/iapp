@@ -50,7 +50,7 @@ class StoreImpl implements Store {
   public whereClauseParams: any[];
   public orderByClause: string;
   private skipOrderBy?: boolean;
-  private actionParams: Map;
+  public actionParams: Map;
   private selectParams?: string[];
 
   constructor(

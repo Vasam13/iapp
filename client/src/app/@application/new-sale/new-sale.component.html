@@ -538,7 +538,18 @@
             <div class="row clearfix">
               <div class="col-md-12">
                 <div class="form-group form-group-default form-group-default-select2">
-                  <label>Requirements</label>
+                  <label style="width:100%">
+                    <div>
+                      <span>Requirements</span>
+                      <span
+                        *ngIf="!readOnlyBidDetails()"
+                        (click)="newRequirement=null;newBidDetailPopup.show()"
+                        class="add-new-option-link"
+                      >
+                        Add new option
+                      </span>
+                    </div>
+                  </label>
                   <pg-select
                     style="width: 100%;"
                     [Mode]="'multiple'"
@@ -757,6 +768,63 @@
               <button
                 class="btn btn-tag btn-complete  btn-tag-primary btn-tag-rounded m-r-5"
                 (click)="addNewCityModal.hide()"
+                type="button"
+              >Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div
+  bsModal
+  #newBidDetailPopup="bs-modal"
+  class="modal fade slide-up disable-scroll"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="false"
+>
+  <div class="modal-dialog modal-md">
+    <div class="modal-content-wrapper">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 m-t-20">
+              <form>
+                <div class="row">
+                  <div class="col-md-12">
+                    <label>
+                      Add new option
+                    </label>
+                    <div class="
+                          form-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter option"
+                        [(ngModel)]="newRequirement"
+                        [ngModelOptions]="{standalone: true}"
+                      >
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 m-t-10  text-center">
+              <button
+                class="btn btn-tag btn-complete  btn-tag-primary btn-tag-rounded m-r-5"
+                (click)="addNewRequirement()"
+                [disabled]="!newRequirement"
+                type="button"
+              >Save</button>
+              <button
+                class="btn btn-tag btn-complete  btn-tag-primary btn-tag-rounded m-r-5"
+                (click)="newBidDetailPopup.hide()"
                 type="button"
               >Cancel</button>
             </div>

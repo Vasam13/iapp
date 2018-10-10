@@ -39,6 +39,8 @@ export class PreferencesComponent implements OnInit, OnDestroy, AfterViewInit {
   upload: any;
   @ViewChild('popupModal')
   popup: ModalDirective;
+  @ViewChild('reloadPopup')
+  reloadPopup: ModalDirective;
 
   userInfo = Utils.getUserInfo();
 
@@ -65,8 +67,13 @@ export class PreferencesComponent implements OnInit, OnDestroy, AfterViewInit {
             url: Utils.getDPUrl(),
             status: 'done'
           };
+          this.reloadPopup.show();
           // this.popup.show();
-          window.location.href = this.router.url;
+          // let url = this.router.url;
+          // if (!url.startsWith('#')) {
+          //   url = '/#' + url;
+          // }
+          // window.location.href = url;
         } else {
           Utils.notifyError(this.message, 'Error while upload', ret.message);
         }

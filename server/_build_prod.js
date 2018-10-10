@@ -6,6 +6,7 @@ shell.exec('cp ./bin/_run.js ./../iapp/server');
 shell.exec('cp ./bin/prod ./../iapp/server');
 shell.exec('cp ./bin/start.sh ./../iapp/server');
 shell.exec('cp ./src/templates/tsconfig.json ./../iapp');
+shell.exec('cp -r ./src/assets ./../iapp/server');
 // shell.exec('cp ./src/templates/package.json ./../iapp/server');
 shell.exec('cp ./src/templates/.properties ./../iapp');
 shell.exec('cd ./../iapp && rm -rf scripts && mkdir scripts');

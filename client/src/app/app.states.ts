@@ -29,17 +29,17 @@ export const AppStates: States = [
       iconName: 'organization'
     }
   },
-  {
-    state: 'settings.email-actions',
-    url: '/settings/email-actions',
-    roleCodes: [Roles.ADMINISTRATOR],
-    menu: {
-      label: 'Email Actions',
-      routerLink: '/settings/email-actions',
-      iconType: 'icon',
-      iconName: 'envelope'
-    }
-  },
+  // {
+  //   state: 'settings.email-actions',
+  //   url: '/settings/email-actions',
+  //   roleCodes: [Roles.ADMINISTRATOR],
+  //   menu: {
+  //     label: 'Email Actions',
+  //     routerLink: '/settings/email-actions',
+  //     iconType: 'icon',
+  //     iconName: 'envelope'
+  //   }
+  // },
   {
     state: 'settings.global-templates',
     url: '/settings/global-templates',

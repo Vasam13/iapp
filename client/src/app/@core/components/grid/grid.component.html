@@ -42,7 +42,7 @@
           >
           </span>
         </div>
-        <div *ngIf="isVisible(row, md)">
+        <div *ngIf="isVisible(row, md) && row.$operation$ !== 'insert'">
           <div
             *ngIf="(md.type === 'link' && md.linkConfiguration)"
             class="active-link grid-link-cell gird-cell-editor"
@@ -66,7 +66,8 @@
           </div>
         </div>
         <input
-          *ngIf="md.type === 'text' || md.type === 'number' || (md.type === 'date')"
+          *ngIf="md.type === 'text' || md.type === 'number' ||
+                    (md.type === 'date' && md.updateAllowed)"
           placeholder="Click to edit"
           autofocus
           [style]="md.style"
@@ -80,6 +81,18 @@
           [type]="getInputType(md)"
           [value]="row[md.column]"
           [(ngModel)]="row[md.column]"
+        />
+        <input
+          *ngIf="md.type === 'date' && !md.updateAllowed && row.$operation$ !== 'insert'"
+          autofocus
+          [style]="md.style"
+          [readonly]="true"
+          class="gird-cell-editor"
+          (click)="store.setCurrentColumn(rowIndex, columnIndex);store.clickHandler(row,md)"
+          [ngClass]="{ 'current-row': store.isCurrentRow(rowIndex), 'first-column': columnIndex===0}"
+          (blur)="store.resetCurrentColumn()"
+          [type]="text"
+          [value]="convertDate(row[md.column])"
         />
         <div
           style="padding-left: 10px"

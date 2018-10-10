@@ -1,15 +1,32 @@
-<html>
+<html>.
 
 <head>
     <meta charset="utf8">
-    <title>SuitArt Business Card</title>
+    <title>PDF</title>
     <style>
         html,
         body {
             margin: 0;
             padding: 0 20;
-            font-family: sans-serif;
             font-size: 11px;
+            font-family: Arial, Helvetica;
+        }
+
+        h3,
+        h2 {
+            margin: 0px;
+        }
+
+        .ql-align-right {
+            text-align: right;
+        }
+
+        .ql-align-center {
+            text-align: center;
+        }
+
+        .ql-indent-1 {
+            padding-left: 3em;
         }
 
         .page {
@@ -80,65 +97,7 @@
             style="display: none"
             src="{logo}"
         >
-        <div style="text-align:center;">
-            <p class="header-1">
-                PROPOSAL FOR DETAILING</p>
-            <p class="header-1">${sales.projectName}</p>
-        </div>
-        <div class="content">
-            <div style="text-align:right;margin-top: 10px;">
-                <p>Date: ${today}</p>
-                <!-- <p style="font-size: 14px; font-weight: bold">JOB NO: 3S/NA/18-19/28</p> -->
-            </div>
-            <div>
-                <p>To</p>
-                <p>${client.contactName}</p>
-                <p>${client.addressLine1}</p>
-                <#if client.addressLine2??>
-                    <p>${client.addressLine2}</p>
-                </#if>
-                <p>${client.city}, ${client.state}</p>
-                <p>${client.country}
-                    <#if client.zip??>,${client.zip}</#if>
-                </p>
-            </div>
-            <p class="heading1 m-t-b-20">
-                PURPOSE
-            </p>
-            <div>
-                <p>
-                    This is a proposal from <b>3S Services Group LLC.</b> For Detailing & Fabrication Drawing Services
-                    to
-                    <b>${client.clientName}.</b>
-                    Regarding <b>${sales.projectName}</b>
-                </p>
-            </div>
-            <p class="heading1 m-t-b-20">SCOPE OF WORK</p>
-            <p class="underline">Main Steel</p>
-            <ol>
-                <#list
-                    estimation.mainSteelInclusions
-                    as
-                    i
-                >
-                    <li>
-                        <p>${i}</p>
-                    </li>
-                </#list>
-            </ol>
-            <p class="underline m-t-b-20">Misc. Steel</p>
-            <ol>
-                <#list
-                    estimation.miscSteelInclusions
-                    as
-                    i
-                >
-                    <li>
-                        <p>${i}</p>
-                    </li>
-                </#list>
-            </ol>
-        </div>
+        {{templateHere}}
     </div>
     <div id="pageFooter">
         <div style="width:100%;height:1px; border-top: 1px solid rgba(180,2,46, 0.5)"></div>

@@ -996,7 +996,7 @@
 
                     <div class="row clearfix">
                       <div class="col-md-12">
-                        <div class="form-group form-group-default form-group-default-select2">
+                        <div class="form-group form-group-default form-group-default-select2 required">
                           <label>MainSteel Inclusions</label>
                           <pg-select
                             style="width: 100%;"
@@ -1005,6 +1005,7 @@
                             [PlaceHolder]="'Select Option'"
                             AllowClear
                             ShowSearch
+                            required
                           >
                             <pg-option
                               *ngFor="let row of filter('main_inclusions')"
@@ -1040,7 +1041,7 @@
 
                     <div class="row clearfix">
                       <div class="col-md-12">
-                        <div class="form-group form-group-default form-group-default-select2">
+                        <div class="form-group form-group-default form-group-default-select2 required">
                           <label>Misc.Steel Inclusions</label>
                           <pg-select
                             style="width: 100%;"
@@ -1049,6 +1050,7 @@
                             [PlaceHolder]="'Select Option'"
                             AllowClear
                             ShowSearch
+                            required
                           >
                             <pg-option
                               *ngFor="let row of filter('misc_inclusions')"
@@ -1174,7 +1176,7 @@
                             pgFormGroupDefault
                             class="form-group form-group-default required"
                           >
-                            <label>MainSteel Price</label>
+                            <label>Main Steel Price</label>
                             <input
                               type="number"
                               placeholder="Enter price"
@@ -1189,7 +1191,7 @@
                             pgFormGroupDefault
                             class="form-group form-group-default required"
                           >
-                            <label>MainSteel Price</label>
+                            <label>Misc Steel Price</label>
                             <input
                               type="number"
                               placeholder="Enter price"
@@ -1318,34 +1320,6 @@
                 </div>
                 <!-- End of Current Quote-->
 
-                <div
-                  class="row"
-                  *ngIf="showNotes"
-                  formArrayName="notes"
-                >
-                  <div
-                    style="width:100%"
-                    *ngFor="let formgroup of salesForm.get('notes')['controls']; let _index = index"
-                  >
-                    <div [formGroupName]="_index">
-                      <p class="m-t-30">
-                        <em class="icon-note  m-l-5"></em>&nbsp;&nbsp;{{formgroup.value.title}}
-                      </p>
-                      <div class="wysiwyg5-wrapper b-a b-grey wysiwug">
-                        <quill-editor
-                          [style]="{height: '200px'}"
-                          placeholder="Enter Requirements"
-                          [modules]="editorModules"
-                          name="content"
-                          formControlName="content"
-                        >
-                        </quill-editor>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-
                 <!-- Submit buttons-->
                 <div class="row clearfix m-t-20">
                   <div class="col-sm-12 col-lg-12 col-md-12 text-center">
@@ -1411,17 +1385,11 @@
                     ><em class="icon-arrow-right"></em>&nbsp;
                       {{quoteBtnText()}}</button>
                     <button
-                      *ngIf="visibleShowNotesBtn()"
-                      (click)="showNotes = !showNotes"
+                      *ngIf="visiblePDFButton()"
+                      (click)="pdfModal.show()"
                       class="btn btn-rounded btn-primary m-r-10"
                       [disabled]="isPageBusy()"
-                    ><em class="icon-note"></em>&nbsp;{{(showNotes) ? 'Hide':'Show'}} Additional Notes</button>
-                    <button
-                      *ngIf="showNotes"
-                      (click)="saveNotes()"
-                      class="btn btn-rounded btn-primary m-r-10"
-                      [disabled]="isPageBusy()"
-                    ><em class="icon-folder"></em>&nbsp;Save Notes</button>
+                    ><em class="icon-doc"></em>&nbsp;Open PDF Template</button>
                     <button
                       *ngIf="visibleSendForQuoteBtn()"
                       (click)="completeQuotation()"
@@ -1609,6 +1577,65 @@
               <button
                 class="btn btn-tag btn-complete  btn-tag-primary btn-tag-rounded m-r-5"
                 (click)="newBidDetailPopup.hide()"
+                type="button"
+              >Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  bsModal
+  #pdfModal="bs-modal"
+  class="modal fade slide-up disable-scroll"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="false"
+>
+  <div class="modal-dialog modal-lg xl-lg">
+    <div class="modal-content-wrapper">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 m-t-20">
+              <form
+                #popupForm="ngForm"
+                [formGroup]="salesForm"
+              >
+                <div class="row">
+                  <div class="col-md-12">
+                    <div
+                      class="form-group"
+                      formGroupName="projectDetails"
+                    >
+                      <div class="wysiwyg5-wrapper b-a b-grey wysiwug">
+                        <quill-editor
+                          [style]="{height: '500px'}"
+                          placeholder="Enter content"
+                          [modules]="editorModules"
+                          formControlName="pdfTemplate"
+                        >
+                        </quill-editor>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 m-t-10  text-center">
+              <button
+                class="btn btn-tag btn-primary  btn-tag-primary btn-tag-rounded m-r-5"
+                (click)="saveSales()"
+                type="button"
+              >Save Changes</button>
+              <button
+                class="btn btn-tag btn-primary  btn-tag-primary btn-tag-rounded m-r-5"
+                (click)="pdfModal.hide()"
                 type="button"
               >Cancel</button>
             </div>

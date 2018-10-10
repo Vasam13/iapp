@@ -147,7 +147,8 @@ export class DataUtils {
       'createUserId',
       'updateDate',
       'updateUserId',
-      'isPdfGenerated'
+      'isPdfGenerated',
+      'pdfTemplate'
     ];
   }
 

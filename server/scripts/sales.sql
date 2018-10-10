@@ -63,13 +63,14 @@ CREATE TABLE sales (
   status varchar(100) NOT NULL,
   pdf blob Default null,
   is_pdf_generated varchar(1),
+  pdf_template TEXT, 
   project_status varchar(100) NULL,
   create_date datetime NOT NULL,
   create_user_id int(11) NOT NULL,
   update_date datetime NOT NULL,
   update_user_id int(11) NOT NULL
 );
-ALTER TABLE sales AUTO_INCREMENT=10000;
+ALTER TABLE sales AUTO_INCREMENT=100;
 
 DROP TABLE IF EXISTS estimations;
 CREATE TABLE estimations (
@@ -145,24 +146,16 @@ CREATE TABLE GLOBAL_TEMPLATES(
 	id INT(11) PRIMARY KEY auto_increment,
     template_code varchar(100) UNIQUE NOT NULL,
     title varchar(1000) NULL,
-	content varchar(2000) NOT NULL,
+	content text NOT NULL,
     create_date datetime NOT NULL,
     create_user_id int(11) NOT NULL,
     update_date datetime NOT NULL,
     update_user_id int(11) NOT NULL
 );
-INSERT INTO global_templates(`template_code`,`title`,`content`,`create_date`,`create_user_id`,`update_date`,`update_user_id`) VALUES
-('pdf_requirements_from_client','REQUIREMENTS FROM THE CLIENT','<ol><li>Detailing Standards</li><li>Released for Construction set</li><li>All Addendums and Bulletins if</li><li>General Contractor name</li><li>Job Number</li><li>Drawing sheet layout and requirements</li><li>Drawing Template</li></ol>',SYSDATE(),1,SYSDATE(),1),
-('pdf_approval_set','OUR APPROVAL SET ALWAYS COMES WITH','<ol><li>Submittal log</li><li>Contract Drawings log</li><li>RFI (If any)</li><li>RFI log (If any)</li></ol>',SYSDATE(),1,SYSDATE(),1),
-('pdf_deliver_checks','DELIVER CHECKS','<ol><li>NC1 Files,</li><li>Kiss Files,</li><li>PDF,</li><li>CNC Files,</li><li>EJE Files,</li><li>Calculation if required (No Stamping)</li><li>Steel Member cut list</li><li>Field Bolt List</li><li>Shop Bolt list</li><li>Sequencing jobs, sequence list</li><li>DXF files for your plasma</li></ol>',SYSDATE(),1,SYSDATE(),1),
-('pdf_lead_time','LEADTIME & MILESTONES','<p><strong>Detailing Schedule </strong></p><p><strong>X + {mainsteelschedule} Weeks (Main Steel for Approval) </strong></p><p><strong>&nbsp,&nbsp,+ {</strong><strong style=''color: rgb(0, 0, 0),''>miscsteelschedule</strong><strong>} Weeks (Misc. Steel for Approval) </strong></p><p><strong>X = Purchase Order release date and final drawings set confirmation.</strong></p>',SYSDATE(),1,SYSDATE(),1),
-('pdf_detailing_price','DETAILING PRICE ','<p><strong>Main Steel USD: {mainsteelprice}</strong></p><p><strong> Misc. Steel USD: {miscsteelprice}</strong></p>',SYSDATE(),1,SYSDATE(),1),
-('pdf_payment_terms','PAYMENT TERMS','<p>1) On Submission of Shop Drawings – 100%</p><p><br></p><p>All Invoices should be paid within 30 Days net after release for final approval. </p><p><br></p><p>All Cheques shall be sent to the below address </p><p><br></p><p>3S Services Group</p><p>733 Telemark Trial,</p><p>Frisco, TX 75034.</p><p>Phone: - 630-881-2687</p>',SYSDATE(),1,SYSDATE(),1),
-('pdf_change_orders','CHANGE ORDERS','<p>Depending on the Job requirement regarding the extra work incurred, additional amount of money would be charged on the extra hour. All these charges would be sent in the form of a <strong>CHANGE ORDER</strong> for approval from client.</p><p><br></p><p>Change Order will be $50.00 per Hr. Minor Changes are not Change Orders. Shop Mistakes, field miss fit-ups, Solution will be provided at no cost.&nbsp,</p>',SYSDATE(),1,SYSDATE(),1),
-('pdf_contact_details','CONTACT DETAILS FOR COMMUNICATION','<p>{executive}</p><p> Senior Sales Executive </p><p>3S Services Group LLC </p><p>733 Telemark Trial, </p><p>Frisco, TX 75034. </p><p>Direct: +1.972-370-3067 </p><p>Phone: 972-737-8088, Ext:210</p><p> Email: {email}</p><p>Website: www.3ssteelservices.com</p><p><br></p><p>This Proposal is valid for 30Days.</p>',SYSDATE(),1,SYSDATE(),1),
-('pdf_accepted','ACCEPTED','<p>sign:-_______________________________</p><p><br></p><p>Title_______________________________</p><p><br></p><p> </p><p>Company : __________________________</p><p><br></p><p> </p><p>P.O #______________________________</p>',SYSDATE(),1,SYSDATE(),1);
-
-
+INSERT INTO global_templates(`template_code`,`title`,`content`,`create_date`,`create_user_id`,`update_date`,`update_user_id`) 
+VALUES ('pdf_template','PDF Template',
+'<h3 class="ql-align-center"><u>PROPOSAL FOR DETAILING</u></h3><h3 class="ql-align-center"><u>${sales.projectName}</u></h3><p class="ql-align-center"><br></p><p class="ql-align-right">Date: {sysdate}</p><p class="ql-align-right">JOB NO: ${jobNumber}</p><p class="ql-align-right"><br></p><p>To</p><p>${client.contactName}</p><p>${client.addressLine1}</p><p>{if_client.addressLine2}</p><p>${client.addressLine2}</p><p>{if_close}</p><p>${client.city}, ${client.state}</p><p>${client.country}{if_client.zip},${client.zip}{if_close}</p><p><br></p><p><br></p><p><strong><u>PURPOSE</u></strong></p><p><br></p><p>This is a proposal from&nbsp;<strong>3S Services Group LLC</strong>. For Detailing &amp; Fabrication Drawing Services to 4G Steel Fabrication LLC. Regarding&nbsp;<strong>${sales.projectName}</strong></p><p><br></p><p><strong><u>SCOPE OF WORK</u></strong></p><p><br></p><p><strong><u>Main Steel</u></strong></p><p>{estimation.mainSteelInclusions}</p><p><strong><u>Misc Steel</u></strong></p><p>{estimation.miscSteelInclusions}</p><p><br></p><p><strong><u>EXCLUSIONS OF WORK</u></strong></p><p><br></p><p><strong><u>Main Steel</u></strong></p><p>{estimation.mainSteelExclusions}</p><p><strong><u>Misc Steel</u></strong></p><p>{estimation.miscSteelExclusions}</p><p><br></p><p><strong><u>REQUIREMENTS FROM THE CLIENT</u></strong></p><p><br></p><ol><li>Detailing Standards</li><li>Released for Construction set</li><li>All Addendums and Bulletins if</li><li>General Contractor name</li><li>Job Number</li><li>Drawing sheet layout and requirements</li><li>Drawing Template</li></ol><p><br></p><p><strong><u>OUR APPROVAL SET ALWAYS COMES WITH</u></strong></p><p><br></p><ol><li>RFI log (If any)</li><li>Contract Drawings log</li><li>RFI (If any)</li><li>RFI log (If any)</li></ol><p><br></p><p><strong><u>DELIVER CHECKS</u></strong></p><p><br></p><ol><li>NC1 Files</li><li>Kiss Files</li><li>PDF</li><li>CNC Files</li><li>EJE Files</li><li>Calculation if required (No Stamping)</li><li>Steel Member cut list</li><li>Field Bolt List</li><li>Shop Bolt list</li><li>Sequencing jobs, sequence list</li><li>DXF files for your plasma</li></ol><p><br></p><p><strong><u>LEADTIME &amp;, MILESTONES</u></strong></p><p><br></p><p class="ql-indent-1">Detailing Schedule</p><p class="ql-indent-1">{schedulesList}</p><p class="ql-indent-1">X = Purchase Order release date and final drawings set confirmation.</p><p><br></p><p><strong><u>DETAILING PRICE</u></strong></p><p><br></p><p class="ql-indent-1"><strong>Main Steel USD: ${quote.mainSteelPrice}</strong></p><p class="ql-indent-1"><strong>Misc. Steel USD: ${quote.miscSteelPrice}</strong></p><p><br></p><p><strong><u>PAYMENT TERMS</u></strong></p><p><br></p><p class="ql-indent-1">1) On Submission of Shop Drawings – 100%</p><p><br></p><p>All Invoices should be paid within 30 Days net after release for final approval.</p><p>All Cheques shall be sent to the below address</p><p><br></p><p>3S Services Group</p><p>733 Telemark Trial</p><p>Frisco, TX 75034.</p><p>Phone: - 630-881-2687</p><p><br></p><p><strong><u>CHANGE ORDERS</u></strong></p><p><br></p><p>Depending on the Job requirement regarding the extra work incurred, additional amount of money would be charged on the extra hour. All these charges would be sent in the form of a&nbsp;<strong>CHANGE ORDER</strong>&nbsp;for approval from client</p><p><br></p><p>Change Order will be $50.00 per Hr. Minor Changes are not Change Orders. Shop Mistakes, field miss fit-ups Solution will be provided at no cost.</p><p><br></p><p><strong><u>CONTACT DETAILS FOR COMMUNICATION</u></strong></p><p><br></p><p class="ql-indent-1"><strong>Naseer</strong></p><p class="ql-indent-1"><strong>Senior Sales Executive</strong></p><p class="ql-indent-1"><strong>3S Services Group LLC</strong></p><p class="ql-indent-1"><strong>733 Telemark Trial,&nbsp;</strong></p><p class="ql-indent-1"><strong>Frisco, TX 75034.</strong></p><p class="ql-indent-1"><strong>Direct: +1.972-370-3067</strong></p><p class="ql-indent-1"><strong>Phone: 972-737-8088, Ext:210</strong></p><p class="ql-indent-1"><strong>Email: naseer@3sservicesgroup.com</strong></p><p class="ql-indent-1"><strong>Website: www.3ssteelservices.com</strong></p><p class="ql-indent-1"><br></p><p>This Proposal is valid for 30Days. added here</p><p><br></p><p><strong><u>ACCEPTED.</u></strong></p><p><br></p><p class="ql-indent-1">sign:-_______________________________</p><p><br></p><p class="ql-indent-1">Title_______________________________</p><p class="ql-indent-1"><br></p><p class="ql-indent-1">Company : __________________________</p><p class="ql-indent-1"><br></p><p class="ql-indent-1">P.O #______________________________</p>',
+sysdate(),1,sysdate(),1);
 
 DROP TABLE IF exists exclusions_inclusions;
 CREATE TABLE `exclusions_inclusions` (
@@ -210,20 +203,6 @@ CREATE TABLE `sales_comments` (
    `id` int(11) primary key auto_increment,
    `sales_id` int(11) NOT NULL,
    `comment` varchar(2000) DEFAULT NULL,
-   `create_date` datetime NOT NULL,
-   `create_user_id` int(11) NOT NULL,
-   `update_date` datetime NOT NULL,
-   `update_user_id` int(11) NOT NULL
-);
-
-DROP TABLE IF exists sales_notes;
-CREATE TABLE `sales_notes` (
-   `id` int(11) primary key auto_increment,
-   `sales_id` int(11) NOT NULL,
-   `code` varchar(200) NOT NULL,
-   `title` varchar(200) NOT NULL,
-   `content` varchar(2000) NOT NULL,
-   `position` int(11) NOT NULL,
    `create_date` datetime NOT NULL,
    `create_user_id` int(11) NOT NULL,
    `update_date` datetime NOT NULL,

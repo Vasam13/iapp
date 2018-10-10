@@ -34,7 +34,10 @@ export class NewSaleComponent extends FormCanDeactivate
 
   @ViewChild('addNewCityModal')
   addNewCityModal: ModalDirective;
+  @ViewChild('newBidDetailPopup')
+  newBidDetailPopup: ModalDirective;
   newCityEntered: string;
+  newRequirement: string;
 
   public salesForm: FormGroup;
   salesStore: Store;
@@ -250,6 +253,21 @@ export class NewSaleComponent extends FormCanDeactivate
     }
   }
 
+  addNewRequirement() {
+    if (
+      this.newRequirement &&
+      this.newRequirement.trim().length > 0 &&
+      this.requirements.indexOf(this.newRequirement) === -1
+    ) {
+      const arr = this.salesForm.value.projectDetails.bidType;
+      arr.push(this.newRequirement);
+      this.requirements.push(this.newRequirement);
+      const form = this.salesForm.controls['projectDetails'] as FormGroup;
+      form.controls['bidType'].setValue(arr);
+    }
+    this.newBidDetailPopup.hide();
+  }
+
   onStateChange = (open: string) => {
     if (!open) {
       const state = this.salesForm.value.projectDetails.projectState;
@@ -269,6 +287,10 @@ export class NewSaleComponent extends FormCanDeactivate
         }
       }
     }
+  };
+
+  readOnlyBidDetails() {
+    return !(this.isSalesManager() || this.isSalesPerson());
   }
 
   onCountryChange = (open: string) => {
@@ -290,5 +312,5 @@ export class NewSaleComponent extends FormCanDeactivate
         }
       }
     }
-  }
+  };
 }

@@ -3,7 +3,10 @@
  * TODO: rebuild latter
  */
 import { DOWN_ARROW, ENTER, TAB } from '@angular/cdk/keycodes';
-import { CdkConnectedOverlay, ConnectedOverlayPositionChange } from '@angular/cdk/overlay';
+import {
+  CdkConnectedOverlay,
+  ConnectedOverlayPositionChange
+} from '@angular/cdk/overlay';
 import {
   forwardRef,
   AfterContentChecked,
@@ -17,7 +20,7 @@ import {
   Output,
   Renderer2,
   ViewChild,
-  ViewEncapsulation,
+  ViewEncapsulation
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { dropDownAnimation } from '../../animations/dropdown-animations';
@@ -28,27 +31,27 @@ import { pgOptionComponent } from './option.component';
 import { OptionPipe } from './option.pipe';
 
 @Component({
-  selector     : 'pg-select',
+  selector: 'pg-select',
   encapsulation: ViewEncapsulation.None,
-  providers    : [
+  providers: [
     {
-      provide    : NG_VALUE_ACCESSOR,
+      provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => pgSelectComponent),
-      multi      : true
+      multi: true
     }
   ],
-  animations   : [
-    dropDownAnimation,
-    tagAnimation
-  ],
-  templateUrl:'./select.component.html',
-  styleUrls    : [
-    './style/index.scss',
-  ]
+  animations: [dropDownAnimation, tagAnimation],
+  templateUrl: './select.component.html',
+  styleUrls: ['./style/index.scss']
 })
-export class pgSelectComponent implements OnInit, AfterContentInit, AfterContentChecked, ControlValueAccessor {
+export class pgSelectComponent
+  implements
+    OnInit,
+    AfterContentInit,
+    AfterContentChecked,
+    ControlValueAccessor {
   private _allowClear = false;
-  private _disabled = false;
+  public _disabled = false;
   private _isTags = false;
   private _isMultiple = false;
   private _keepUnListOptions = false;
@@ -64,7 +67,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   _size: string;
   _value: string[] | string;
   _placeholder = 'placeholder';
-  _notFoundContent = "No Content";
+  _notFoundContent = 'No Content';
   _searchText = '';
   _triggerWidth = 0;
   _selectedOption: pgOptionComponent;
@@ -82,15 +85,24 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   // ngModel Access
   onChange: (value: string | string[]) => void = () => null;
   onTouched: () => void = () => null;
-  @ViewChild('searchInput') searchInputElementRef;
-  @ViewChild('trigger') trigger: ElementRef;
-  @ViewChild('dropdownUl') dropdownUl: ElementRef;
-  @Output() SearchChange: EventEmitter<string> = new EventEmitter();
-  @Output() OpenChange: EventEmitter<boolean> = new EventEmitter();
-  @Output() ScrollToBottom: EventEmitter<boolean> = new EventEmitter();
-  @Input() Filter = true;
-  @Input() MaxMultiple = Infinity;
-  @ViewChild(CdkConnectedOverlay) _cdkOverlay: CdkConnectedOverlay;
+  @ViewChild('searchInput')
+  searchInputElementRef;
+  @ViewChild('trigger')
+  trigger: ElementRef;
+  @ViewChild('dropdownUl')
+  dropdownUl: ElementRef;
+  @Output()
+  SearchChange: EventEmitter<string> = new EventEmitter();
+  @Output()
+  OpenChange: EventEmitter<boolean> = new EventEmitter();
+  @Output()
+  ScrollToBottom: EventEmitter<boolean> = new EventEmitter();
+  @Input()
+  Filter = true;
+  @Input()
+  MaxMultiple = Infinity;
+  @ViewChild(CdkConnectedOverlay)
+  _cdkOverlay: CdkConnectedOverlay;
 
   @Input()
   set AllowClear(value: boolean) {
@@ -154,7 +166,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
 
   @Input()
   set Size(value: string) {
-    this._size = { large: 'lg', small: 'sm' }[ value ];
+    this._size = { large: 'lg', small: 'sm' }[value];
     this.setClassMap();
   }
 
@@ -218,7 +230,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   }
 
   /** new -option insert or new tags insert */
-  addOption = (option) => {
+  addOption = option => {
     this._options.push(option);
     if (!this._isTags) {
       if (option.Value) {
@@ -227,7 +239,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
         this.forceUpdateSelectedOption(this._value);
       }
     }
-  }
+  };
 
   /** -option remove or tags remove */
   removeOption(option: pgOptionComponent): void {
@@ -274,7 +286,11 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   }
 
   /** choose option */
-  chooseOption(option: pgOptionComponent, isUserClick: boolean = false, $event?: MouseEvent): void {
+  chooseOption(
+    option: pgOptionComponent,
+    isUserClick: boolean = false,
+    $event?: MouseEvent
+  ): void {
     if ($event) {
       $event.preventDefault();
       $event.stopPropagation();
@@ -289,7 +305,9 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
         }
       } else {
         if (isUserClick) {
-          this.isInSet(this._selectedOptions, option) ? this.unSelectMultipleOption(option) : this.selectMultipleOption(option);
+          this.isInSet(this._selectedOptions, option)
+            ? this.unSelectMultipleOption(option)
+            : this.selectMultipleOption(option);
         }
       }
     }
@@ -307,8 +325,13 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   }
 
   /** determine if option in set */
-  isInSet(set: Set<pgOptionComponent>, option: pgOptionComponent): pgOptionComponent {
-    return ((Array.from(set) as pgOptionComponent[]).find((data: pgOptionComponent) => data.Value === option.Value));
+  isInSet(
+    set: Set<pgOptionComponent>,
+    option: pgOptionComponent
+  ): pgOptionComponent {
+    return (Array.from(set) as pgOptionComponent[]).find(
+      (data: pgOptionComponent) => data.Value === option.Value
+    );
   }
 
   /** cancel select multiple option */
@@ -320,7 +343,11 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     }
 
     // 对Tag进行特殊处理
-    if (this._isTags && (this._options.indexOf(option) !== -1) && (this._tagsOptions.indexOf(option) !== -1)) {
+    if (
+      this._isTags &&
+      this._options.indexOf(option) !== -1 &&
+      this._tagsOptions.indexOf(option) !== -1
+    ) {
       this.removeOption(option);
       this._tagsOptions.splice(this._tagsOptions.indexOf(option), 1);
     }
@@ -328,12 +355,16 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
       $event.preventDefault();
       $event.stopPropagation();
     }
-  }
+  };
 
   /** select multiple option */
   selectMultipleOption(option: pgOptionComponent, $event?: MouseEvent): void {
     /** if tags do push to tag option */
-    if (this._isTags && (this._options.indexOf(option) === -1) && (this._tagsOptions.indexOf(option) === -1)) {
+    if (
+      this._isTags &&
+      this._options.indexOf(option) === -1 &&
+      this._tagsOptions.indexOf(option) === -1
+    ) {
       this.addOption(option);
       this._tagsOptions.push(option);
     }
@@ -360,18 +391,23 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   }
 
   /** update selected option when add remove option etc */
-  updateSelectedOption(currentModelValue: string | string[], triggerByNgModel: boolean = false): void {
+  updateSelectedOption(
+    currentModelValue: string | string[],
+    triggerByNgModel: boolean = false
+  ): void {
     if (currentModelValue == null) {
       return;
     }
     if (this.Multiple) {
-      const selectedOptions = this._options.filter((item) => {
-        return (item != null) && (currentModelValue.indexOf(item.Value) !== -1);
+      const selectedOptions = this._options.filter(item => {
+        return item != null && currentModelValue.indexOf(item.Value) !== -1;
       });
-      if ((this.KeepUnListOptions || this.Tags) && (!triggerByNgModel)) {
+      if ((this.KeepUnListOptions || this.Tags) && !triggerByNgModel) {
         const _selectedOptions = Array.from(this._selectedOptions);
         selectedOptions.forEach(option => {
-          const _exist = _selectedOptions.some(item => item._value === option._value);
+          const _exist = _selectedOptions.some(
+            item => item._value === option._value
+          );
           if (!_exist) {
             this._selectedOptions.add(option);
           }
@@ -382,12 +418,11 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
           this._selectedOptions.add(option);
         });
       }
-
     } else {
-      const selectedOption = this._options.filter((item) => {
-        return (item != null) && (item.Value === currentModelValue);
+      const selectedOption = this._options.filter(item => {
+        return item != null && item.Value === currentModelValue;
       });
-      this.chooseOption(selectedOption[ 0 ]);
+      this.chooseOption(selectedOption[0]);
     }
   }
 
@@ -423,7 +458,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   }
 
   handleKeyBackspaceEvent(event: KeyboardEvent): void {
-    if ((!this._searchText) && (!this._composing) && (this._isMultiple)) {
+    if (!this._searchText && !this._composing && this._isMultiple) {
       event.preventDefault();
       const lastOption = Array.from(this._selectedOptions).pop();
       this.unSelectMultipleOption(lastOption);
@@ -434,7 +469,10 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     if (this._isOpen) {
       $event.preventDefault();
       $event.stopPropagation();
-      this._activeFilterOption = this.nextOption(this._activeFilterOption, this._filterOptions.filter(w => !w.Disabled));
+      this._activeFilterOption = this.nextOption(
+        this._activeFilterOption,
+        this._filterOptions.filter(w => !w.Disabled)
+      );
       this.scrollToActive();
     }
   }
@@ -443,17 +481,26 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     if (this._isOpen) {
       $event.preventDefault();
       $event.stopPropagation();
-      this._activeFilterOption = this.preOption(this._activeFilterOption, this._filterOptions.filter(w => !w.Disabled));
+      this._activeFilterOption = this.preOption(
+        this._activeFilterOption,
+        this._filterOptions.filter(w => !w.Disabled)
+      );
       this.scrollToActive();
     }
   }
 
-  preOption(option: pgOptionComponent, options: pgOptionComponent[]): pgOptionComponent {
-    return options[ options.indexOf(option) - 1 ] || options[ options.length - 1 ];
+  preOption(
+    option: pgOptionComponent,
+    options: pgOptionComponent[]
+  ): pgOptionComponent {
+    return options[options.indexOf(option) - 1] || options[options.length - 1];
   }
 
-  nextOption(option: pgOptionComponent, options: pgOptionComponent[]): pgOptionComponent {
-    return options[ options.indexOf(option) + 1 ] || options[ 0 ];
+  nextOption(
+    option: pgOptionComponent,
+    options: pgOptionComponent[]
+  ): pgOptionComponent {
+    return options[options.indexOf(option) + 1] || options[0];
   }
 
   clearSearchText(): void {
@@ -464,11 +511,13 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   updateFilterOption(updateActiveFilter: boolean = true): void {
     if (this.Filter) {
       this._filterOptions = new OptionPipe().transform(this._options, {
-        'searchText'     : this._searchText,
-        'tags'           : this._isTags,
-        'notFoundContent': this._isTags ? this._searchText : this._notFoundContent,
-        'disabled'       : !this._isTags,
-        'value'          : this._isTags ? this._searchText : 'disabled'
+        searchText: this._searchText,
+        tags: this._isTags,
+        notFoundContent: this._isTags
+          ? this._searchText
+          : this._notFoundContent,
+        disabled: !this._isTags,
+        value: this._isTags ? this._searchText : 'disabled'
       });
     } else {
       this._filterOptions = this._options;
@@ -476,7 +525,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
 
     /** TODO: cause pre & next key selection not work */
     if (updateActiveFilter && !this._selectedOption) {
-      this._activeFilterOption = this._filterOptions[ 0 ];
+      this._activeFilterOption = this._filterOptions[0];
     }
   }
 
@@ -484,7 +533,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     this.SearchChange.emit(searchValue);
   }
 
-  @HostListener('click', [ '$event' ])
+  @HostListener('click', ['$event'])
   onClick(e: MouseEvent): void {
     e.preventDefault();
     if (!this._disabled) {
@@ -498,7 +547,7 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     }
   }
 
-  @HostListener('keydown', [ '$event' ])
+  @HostListener('keydown', ['$event'])
   onKeyDown(e: KeyboardEvent): void {
     const keyCode = e.keyCode;
     if (keyCode === TAB && this.Open) {
@@ -526,7 +575,10 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     }
     this.onTouched();
     if (this.Multiple) {
-      this._renderer.removeStyle(this.searchInputElementRef.nativeElement, 'width');
+      this._renderer.removeStyle(
+        this.searchInputElementRef.nativeElement,
+        'width'
+      );
     }
     this.clearSearchText();
     this.Open = false;
@@ -538,33 +590,35 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     });
     this._classList = [
       this._prefixCls,
-      (this._mode === 'combobox') && `${this._prefixCls}-combobox`,
-      (!this._disabled) && `${this._prefixCls}-enabled`,
-      (this._disabled) && `${this._prefixCls}-disabled`,
+      this._mode === 'combobox' && `${this._prefixCls}-combobox`,
+      !this._disabled && `${this._prefixCls}-enabled`,
+      this._disabled && `${this._prefixCls}-disabled`,
       this._isOpen && `${this._prefixCls}-open`,
       this._showSearch && `${this._prefixCls}-show-search`,
       this._size && `${this._prefixCls}-${this._size}`
-    ].filter((item) => {
+    ].filter(item => {
       return !!item;
     });
     this._classList.forEach(_className => {
       this._renderer.addClass(this._el, _className);
     });
     this._selectionClassMap = {
-      [this._selectionPrefixCls]               : true,
-      [`${this._selectionPrefixCls}--single`]  : !this.Multiple,
+      [this._selectionPrefixCls]: true,
+      [`${this._selectionPrefixCls}--single`]: !this.Multiple,
       [`${this._selectionPrefixCls}--multiple`]: this.Multiple
     };
   }
 
   setDropDownClassMap(): void {
     this._dropDownClassMap = {
-      [this._dropDownPrefixCls]                          : true,
-      ['component-select']                               : this._mode === 'combobox',
-      [`${this._dropDownPrefixCls}--single`]             : !this.Multiple,
-      [`${this._dropDownPrefixCls}--multiple`]           : this.Multiple,
-      [`${this._dropDownPrefixCls}-placement-bottomLeft`]: this._dropDownPosition === 'bottom',
-      [`${this._dropDownPrefixCls}-placement-topLeft`]   : this._dropDownPosition === 'top'
+      [this._dropDownPrefixCls]: true,
+      ['component-select']: this._mode === 'combobox',
+      [`${this._dropDownPrefixCls}--single`]: !this.Multiple,
+      [`${this._dropDownPrefixCls}--multiple`]: this.Multiple,
+      [`${this._dropDownPrefixCls}-placement-bottomLeft`]:
+        this._dropDownPosition === 'bottom',
+      [`${this._dropDownPrefixCls}-placement-topLeft`]:
+        this._dropDownPosition === 'top'
     };
   }
 
@@ -572,14 +626,17 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     /** wait for dropdown display */
     setTimeout(_ => {
       if (this._activeFilterOption && this._activeFilterOption.Value) {
-        const index = this._filterOptions.findIndex(option => option.Value === this._activeFilterOption.Value);
+        const index = this._filterOptions.findIndex(
+          option => option.Value === this._activeFilterOption.Value
+        );
         try {
-          const scrollPane = this.dropdownUl.nativeElement.children[ index ] as HTMLLIElement;
+          const scrollPane = this.dropdownUl.nativeElement.children[
+            index
+          ] as HTMLLIElement;
           // TODO: scrollIntoViewIfNeeded is not a standard API, why doing so?
           /* tslint:disable-next-line:no-any */
           (scrollPane as any).scrollIntoViewIfNeeded(false);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
     });
   }
@@ -626,13 +683,17 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
   }
 
   dropDownScroll(ul: HTMLUListElement): void {
-    if (ul && (ul.scrollHeight - ul.scrollTop === ul.clientHeight)) {
+    if (ul && ul.scrollHeight - ul.scrollTop === ul.clientHeight) {
       this.ScrollToBottom.emit(true);
     }
   }
 
   checkDropDownScroll(): void {
-    if (this.dropdownUl && (this.dropdownUl.nativeElement.scrollHeight === this.dropdownUl.nativeElement.clientHeight)) {
+    if (
+      this.dropdownUl &&
+      this.dropdownUl.nativeElement.scrollHeight ===
+        this.dropdownUl.nativeElement.clientHeight
+    ) {
       this.ScrollToBottom.emit(true);
     }
   }
@@ -663,11 +724,14 @@ export class pgSelectComponent implements OnInit, AfterContentInit, AfterContent
     }
   }
 
-  private _updateValue(value: string[] | string, emitChange: boolean = true): void {
+  private _updateValue(
+    value: string[] | string,
+    emitChange: boolean = true
+  ): void {
     if (this._value === value) {
       return;
     }
-    if ((value == null) && this.Multiple) {
+    if (value == null && this.Multiple) {
       this._value = [];
     } else {
       this._value = value;

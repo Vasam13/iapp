@@ -34,7 +34,7 @@ CREATE TABLE roles(
     UNIQUE KEY `role_unique_key` (`role_name`,`role_code`)
 );
 insert into roles(role_id, role_name, role_code, role_category, create_date, create_user_id,update_date, update_user_id) values
-(0, 'Administrator', 'administrator', 'Default', SYSDATE(), 1,  SYSDATE(), 1 );
+(1, 'Administrator', 'administrator', 'Default', SYSDATE(), 1,  SYSDATE(), 1 );
 insert into roles(role_name, role_code, role_category, create_date, create_user_id,update_date, update_user_id) values
 ('Sales Person', 'salesperson', 'Sales', SYSDATE(), 1,  SYSDATE(), 1 ),
 ('Sales Manager', 'salesmanager', 'Sales', SYSDATE(), 1,  SYSDATE(), 1 ),
@@ -58,7 +58,7 @@ CREATE TABLE user_roles(
     update_user_id int(11) NOT NULL
 );
 insert into user_roles(role_id, user_id, create_date, create_user_id,update_date, update_user_id) 
-values(0, 1000, SYSDATE(), 1,  SYSDATE(), 1 );
+values(1, 1000, SYSDATE(), 1,  SYSDATE(), 1 );
 
 DROP TABLE IF EXISTS role_category;
 CREATE TABLE role_category(

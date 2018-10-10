@@ -27,10 +27,23 @@ export default class sales extends Table {
   // db: DatabaseManager = DatabaseManager.getInstance();
 
   public async beforeQuery(queryRequest: QueryRequest) {
-    // Write your code below
-
-    //Don't change below line
-    return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      if (
+        queryRequest.actionParams &&
+        queryRequest.actionParams.generateQuotePDF &&
+        queryRequest.actionParams.generateQuotePDF === 'Y' &&
+        queryRequest.actionParams.salesId
+      ) {
+        GenerateQuotePDF.generate(queryRequest.actionParams.salesId).then(
+          res => {
+            this.skipQuery = true;
+            return resolve();
+          }
+        );
+      } else {
+        return resolve();
+      }
+    });
   }
 
   public async afterQuery(_rows: Row[]): Promise<any> {
@@ -72,19 +85,7 @@ export default class sales extends Table {
   public async afterUpdate(_row: Row): Promise<any> {
     return new Promise((resolve, reject) => {
       const row: Sales = <Sales>_row;
-      if (
-        _row.$actionParams$ &&
-        _row.$actionParams$.generateQuotePDF &&
-        _row.$actionParams$.generateQuotePDF === 'Y'
-      ) {
-        if (row.salesId) {
-          GenerateQuotePDF.generate(row.salesId).then(res => {
-            return resolve();
-          });
-        }
-      } else {
-        return resolve();
-      }
+      return resolve();
     });
   }
 

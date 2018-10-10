@@ -111,7 +111,8 @@ export class SalesComponent implements OnInit, OnDestroy {
 
   downloadPDF(row: SalesType) {
     let url =
-      'type=pdf&export=view&ds=sales&column=pdf&pk=sales_id&pkv=' + row.salesId;
+      'ext=application/pdf&type=pdf&export=view&ds=sales&column=pdf&pk=sales_id&pkv=' +
+      row.salesId;
     url = '/api/download/' + btoa(url);
     window.open(url, '_blank');
   }
@@ -140,6 +141,9 @@ export class SalesComponent implements OnInit, OnDestroy {
       }
       if (row.status === LeadStatus.QUOTED) {
         badge = 'success';
+      }
+      if (row.status === LeadStatus.QUOTATION_SENT) {
+        badge = 'primary';
       }
       if (row.status === LeadStatus.CLOSED_LOSE) {
         badge = 'important';

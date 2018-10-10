@@ -153,6 +153,8 @@ export default class Utils {
         );
         if (rows && rows.length > 0) {
           return resolve(rows[0]);
+        }else {
+          return resolve();
         }
       } catch (error) {
         return reject(error);
@@ -448,7 +450,6 @@ export default class Utils {
           if (columns[key] !== 'blob') {
             sql += '`' + Utils.inverseCamelCase(key) + '`,';
           }
-          111;
         });
       }
       if (sql.endsWith(',')) {

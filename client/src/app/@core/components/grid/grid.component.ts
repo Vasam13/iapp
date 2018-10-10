@@ -59,6 +59,24 @@ export class GridComponent implements OnInit {
     return columnMD.type;
   }
 
+  convertDate = (str: string) => {
+    if (str && str.trim().length > 0 && str.indexOf('-') > -1) {
+      const arr = str.split('-');
+      if (arr.length === 3) {
+        return [arr[2], arr[1], arr[0]].join('/');
+      }
+      return str;
+    }
+    return str;
+  }
+
+  getValue(columnMD, row) {
+    if (columnMD.type === ColumnType.DATE && !columnMD.updateAllowed) {
+      return this.convertDate(row[columnMD.column]);
+    }
+    return row[columnMD.column];
+  }
+
   onCheckboxChanged(row, md) {
     row[md.column] = row[md.column] ? 'Y' : 'N';
   }
